@@ -6,174 +6,251 @@
     <meta name="theme-color" content="#2E7D32">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>عدادات الكهرباء - الجوال</title>
+    <title>نظام تسجيل بيانات عدادات الكهرباء - الجوال</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
     <style>
+        /* نظام الألوان */
         :root {
-            --primary: #2E7D32;
-            --secondary: #4CAF50;
-            --accent: #8BC34A;
-            --danger: #f44336;
-            --warning: #FF9800;
-            --info: #2196F3;
-            --light: #f5f5f5;
-            --dark: #1B5E20;
-            --text: #333333;
-            --border: #E0E0E0;
+            --primary-color: #2E7D32;
+            --primary-dark: #1B5E20;
+            --primary-light: #4CAF50;
+            --secondary-color: #FF9800;
+            --accent-color: #8BC34A;
+            --danger-color: #f44336;
+            --warning-color: #FFC107;
+            --info-color: #2196F3;
+            --light-color: #f5f5f5;
+            --dark-color: #333333;
+            --border-color: #E0E0E0;
+            --text-color: #333333;
+            --text-light: #666666;
+            --success-bg: #E8F5E8;
+            --error-bg: #FFEBEE;
+            --warning-bg: #FFF8E1;
+            --info-bg: #E3F2FD;
         }
         
+        /* إعدادات عامة */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        html {
+            height: 100%;
+            scroll-behavior: smooth;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: var(--text-color);
             line-height: 1.6;
             padding: 0;
             margin: 0;
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
+        /* الحاوية الرئيسية */
         .app-container {
             max-width: 100%;
             min-height: 100vh;
             background: white;
             position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* الهيدر */
+        /* رأس التطبيق */
         .app-header {
-            background: var(--primary);
+            background: var(--primary-color);
             color: white;
-            padding: 15px;
+            padding: 15px 20px;
             position: sticky;
             top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
         
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
         }
         
         .app-title {
-            font-size: 1.3em;
-            font-weight: 600;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .app-subtitle {
-            font-size: 0.9em;
+            font-size: 0.85em;
             opacity: 0.9;
+            font-weight: 400;
         }
         
-        /* التنقل بين الصفحات */
+        .connection-status {
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.2);
+            margin-top: 5px;
+        }
+        
+        /* شريط التنقل */
         .nav-tabs {
             display: flex;
-            background: var(--dark);
+            background: var(--primary-dark);
             position: sticky;
-            top: 70px;
-            z-index: 99;
+            top: 80px;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .nav-tab {
             flex: 1;
             text-align: center;
-            padding: 12px 5px;
+            padding: 14px 8px;
             color: white;
             text-decoration: none;
-            font-size: 0.85em;
+            font-size: 0.8em;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.1);
         }
         
         .nav-tab.active {
-            border-bottom-color: var(--accent);
-            background: rgba(255,255,255,0.1);
+            border-bottom-color: var(--accent-color);
+            background: rgba(255,255,255,0.15);
         }
         
         .nav-tab i {
             display: block;
-            font-size: 1.2em;
-            margin-bottom: 4px;
+            font-size: 1.3em;
+            margin-bottom: 6px;
         }
         
-        /* المحتوى */
+        /* المحتوى والصفحات */
         .page {
             display: none;
-            padding: 15px;
-            padding-bottom: 80px;
+            padding: 20px 15px;
+            padding-bottom: 100px;
+            animation: fadeInUp 0.4s ease;
         }
         
         .page.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         /* البطاقات */
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
         }
         
         .card-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--primary);
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-color);
         }
         
-        /* حقول الإدخال */
+        .card-title::before {
+            font-size: 1.3em;
+        }
+        
+        /* مجموعات النماذج */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text);
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
             font-size: 0.95em;
+            transition: all 0.3s ease;
         }
         
         .required::after {
             content: " *";
-            color: var(--danger);
+            color: var(--danger-color);
+            font-weight: bold;
         }
         
-        .form-input, .form-select {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
+            padding: 16px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             font-size: 16px;
             background: white;
             transition: all 0.3s ease;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
         }
         
-        .form-input:focus, .form-select:focus {
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+            background: #fafafa;
+        }
+        
+        .form-input:invalid {
+            border-color: var(--danger-color);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
         }
         
         /* الأزرار */
@@ -181,17 +258,38 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 16px 24px;
+            gap: 10px;
+            padding: 18px 28px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             text-decoration: none;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
         }
         
         .btn:active {
@@ -199,165 +297,308 @@
         }
         
         .btn-primary {
-            background: var(--primary);
+            background: var(--primary-color);
             color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
         }
         
         .btn-success {
-            background: var(--secondary);
+            background: var(--primary-light);
             color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--primary-color);
         }
         
         .btn-danger {
-            background: var(--danger);
+            background: var(--danger-color);
             color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
         }
         
         .btn-warning {
-            background: var(--warning);
-            color: white;
+            background: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-warning:hover {
+            background: #FFA000;
         }
         
         .btn-info {
-            background: var(--info);
+            background: var(--info-color);
             color: white;
         }
         
-        /* الكاميرا والصور */
+        .btn-info:hover {
+            background: #1976D2;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #F57C00;
+        }
+        
+        .btn:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled::before {
+            display: none;
+        }
+        
+        /* مجموعة الأزرار */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn-group-full {
+            grid-template-columns: 1fr;
+        }
+        
+        /* قسم الكاميرا */
         .camera-section {
             text-align: center;
             padding: 20px;
+            background: var(--light-color);
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
         
         .camera-preview {
             width: 100%;
-            max-width: 300px;
-            height: 200px;
-            background: var(--light);
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            margin: 0 auto 15px;
+            max-width: 320px;
+            height: 240px;
+            background: var(--border-color);
+            border: 3px dashed var(--primary-color);
+            border-radius: 12px;
+            margin: 0 auto 20px;
             display: none;
             object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .camera-preview.active {
+            display: block;
+            animation: cameraActive 0.5s ease;
+        }
+        
+        @keyframes cameraActive {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         
         .captured-image {
             width: 100%;
-            max-width: 200px;
-            height: 150px;
-            border-radius: 8px;
-            margin: 5px;
+            max-width: 180px;
+            height: 140px;
+            border-radius: 10px;
+            margin: 8px;
             object-fit: cover;
-            border: 2px solid var(--primary);
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .captured-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
         
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
         
         .image-item {
             position: relative;
+            text-align: center;
         }
         
         .remove-image {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            background: var(--danger);
+            top: 8px;
+            left: 8px;
+            background: var(--danger-color);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 25px;
-            height: 25px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         
-        /* الموقع */
+        .remove-image:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
+        }
+        
+        .image-label {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        
+        /* قسم الموقع */
         .location-card {
-            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-            border: 2px solid var(--info);
+            background: linear-gradient(135deg, var(--info-bg) 0%, #E1F5FE 100%);
+            border: 2px solid var(--info-color);
         }
         
-        .coordinates {
+        .coordinates-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
+            margin-top: 20px;
         }
         
-        /* التقدم */
+        .location-status {
+            text-align: center;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-weight: 500;
+            background: var(--light-color);
+            border-left: 4px solid var(--info-color);
+        }
+        
+        /* شريط التقدم */
+        .progress-container {
+            margin: 20px 0;
+        }
+        
         .progress-bar {
             width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
             overflow: hidden;
             margin: 10px 0;
         }
         
         .progress {
             height: 100%;
-            background: var(--secondary);
+            background: linear-gradient(90deg, var(--primary-light), var(--primary-color));
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.4s ease;
+            border-radius: 4px;
         }
         
-        /* الرسائل */
-        .message {
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 10px;
+        .progress-text {
             text-align: center;
-            font-weight: 500;
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+        
+        /* رسائل النظام */
+        .message {
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            animation: messageSlide 0.5s ease;
+            border-left: 4px solid;
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .message-success {
-            background: #E8F5E8;
-            color: var(--dark);
-            border: 1px solid var(--secondary);
+            background: var(--success-bg);
+            color: var(--primary-dark);
+            border-left-color: var(--primary-light);
         }
         
         .message-error {
-            background: #FFEBEE;
-            color: var(--danger);
-            border: 1px solid var(--danger);
+            background: var(--error-bg);
+            color: #b71c1c;
+            border-left-color: var(--danger-color);
         }
         
-        /* التذييل */
-        .app-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid var(--border);
-            padding: 10px 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 100;
+        .message-warning {
+            background: var(--warning-bg);
+            color: #FF6F00;
+            border-left-color: var(--warning-color);
         }
         
-        .footer-btn {
-            flex: 1;
+        .message-info {
+            background: var(--info-bg);
+            color: #0D47A1;
+            border-left-color: var(--info-color);
         }
         
         /* التحميل */
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
+            background: var(--light-color);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .loading.active {
+            display: block;
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border);
-            border-top: 4px solid var(--primary);
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 15px;
         }
         
         @keyframes spin {
@@ -365,93 +606,250 @@
             100% { transform: rotate(360deg); }
         }
         
+        .loading-text {
+            font-size: 1em;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        
+        /* تذييل التطبيق */
+        .app-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid var(--border-color);
+            padding: 12px 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .footer-btn {
+            flex: 1;
+            padding: 14px 10px;
+            font-size: 0.8em;
+        }
+        
+        /* معاينة البيانات */
+        .review-section {
+            background: var(--light-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .review-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        
+        .review-label {
+            font-weight: 600;
+            color: var(--text-color);
+            flex: 1;
+        }
+        
+        .review-value {
+            color: var(--text-light);
+            flex: 1;
+            text-align: left;
+            direction: ltr;
+        }
+        
+        .review-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .review-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
+        }
+        
         /* التكيف مع الشاشات الصغيرة */
         @media (max-width: 480px) {
             .app-title {
-                font-size: 1.1em;
+                font-size: 1.2em;
+            }
+            
+            .app-header {
+                padding: 12px 15px;
             }
             
             .card {
-                padding: 15px;
+                padding: 20px;
+                margin-bottom: 15px;
             }
             
             .btn {
-                padding: 14px 20px;
+                padding: 16px 20px;
+                font-size: 15px;
             }
             
-            .coordinates {
+            .form-input, .form-select {
+                padding: 14px 16px;
+            }
+            
+            .coordinates-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .nav-tab {
+                padding: 12px 5px;
+                font-size: 0.75em;
+            }
+            
+            .nav-tab i {
+                font-size: 1.2em;
+                margin-bottom: 4px;
             }
         }
         
-        /* تحسينات لللمس */
-        @media (hover: none) and (pointer: coarse) {
-            .form-input, .form-select, .btn {
-                font-size: 16px;
+        /* تحسينات للشاشات الكبيرة */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 500px;
+                margin: 20px auto;
+                border-radius: 20px;
+                overflow: hidden;
             }
             
-            .btn {
-                min-height: 44px;
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
             }
+        }
+        
+        /* تحسينات خاصة لللمس */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 54px;
+            }
+            
+            .form-input, .form-select, .btn {
+                font-size: 16px; /* منع التكبير في iOS */
+            }
+            
+            .card:hover {
+                transform: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            }
+        }
+        
+        /* تحسينات لإمكانية الوصول */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--light-color);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- الهيدر -->
+        <!-- رأس التطبيق -->
         <header class="app-header">
             <div class="header-content">
                 <div>
-                    <div class="app-title">⚡ نظام العدادات</div>
-                    <div class="app-subtitle">لتسجيل بيانات عدادات الكهرباء</div>
+                    <div class="app-title">
+                        <span>⚡</span>
+                        نظام العدادات
+                    </div>
+                    <div class="app-subtitle">لتسجيل بيانات عدادات الكهرباء عبر الجوال</div>
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    🔄 جاري الاختبار...
                 </div>
             </div>
         </header>
         
-        <!-- التنقل -->
+        <!-- شريط التنقل -->
         <nav class="nav-tabs">
-            <a href="#" class="nav-tab active" onclick="showPage('data-entry')">
+            <button class="nav-tab active" onclick="showPage('data-entry')">
                 <span>📝</span>
                 البيانات
-            </a>
-            <a href="#" class="nav-tab" onclick="showPage('camera')">
+            </button>
+            <button class="nav-tab" onclick="showPage('camera')">
                 <span>📷</span>
                 الصور
-            </a>
-            <a href="#" class="nav-tab" onclick="showPage('location')">
+            </button>
+            <button class="nav-tab" onclick="showPage('location')">
                 <span>📍</span>
                 الموقع
-            </a>
-            <a href="#" class="nav-tab" onclick="showPage('submit')">
+            </button>
+            <button class="nav-tab" onclick="showPage('submit')">
                 <span>✅</span>
                 الإرسال
-            </a>
+            </button>
         </nav>
         
         <!-- صفحة إدخال البيانات -->
         <section id="data-entry" class="page active">
             <div class="card">
-                <div class="card-title">🔧 بيانات العداد</div>
+                <div class="card-title">🔧 بيانات العداد الرئيسية</div>
                 
                 <div class="form-group">
-                    <label class="form-label required">رقم العداد</label>
-                    <input type="text" class="form-input" id="meterNumber" placeholder="أدخل رقم العداد">
+                    <label for="meterNumber" class="form-label required">رقم العداد</label>
+                    <input type="text" id="meterNumber" class="form-input" placeholder="أدخل رقم العداد أو امسح الباركود" value="TEST-001" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">نوع العداد</label>
-                    <select class="form-select" id="meterType">
-                        <option value="">اختر النوع</option>
-                        <option value="ذكى">عداد ذكي</option>
+                    <label for="meterType" class="form-label required">نوع العداد</label>
+                    <select id="meterType" class="form-select" required>
+                        <option value="">اختر نوع العداد</option>
+                        <option value="ذكى" selected>عداد ذكي</option>
                         <option value="ميكانيكى">عداد ميكانيكي</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">ماركة العداد</label>
-                    <select class="form-select" id="meterBrand">
-                        <option value="">اختر الماركة</option>
-                        <option value="هيدروس">هيدروس</option>
+                    <label for="meterBrand" class="form-label required">ماركة العداد</label>
+                    <select id="meterBrand" class="form-select" required>
+                        <option value="">اختر ماركة العداد</option>
+                        <option value="هيدروس" selected>هيدروس</option>
                         <option value="سنسوس">سنسوس</option>
                         <option value="انتجرا">انتجرا</option>
                         <option value="wadad">Wadad</option>
@@ -460,49 +858,49 @@
             </div>
             
             <div class="card">
-                <div class="card-title">🔩 المحبس والصندوق</div>
+                <div class="card-title">🔩 بيانات المحبس والصندوق</div>
                 
                 <div class="form-group">
-                    <label class="form-label required">نوع المحبس</label>
-                    <select class="form-select" id="valveType">
-                        <option value="">اختر النوع</option>
-                        <option value="بوقاتى">بوقاتي</option>
+                    <label for="valveType" class="form-label required">نوع المحبس</label>
+                    <select id="valveType" class="form-select" required>
+                        <option value="">اختر نوع المحبس</option>
+                        <option value="بوقاتى" selected>بوقاتي</option>
                         <option value="عادى">عادي</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">حالة المحبس</label>
-                    <select class="form-select" id="valveCondition">
-                        <option value="">اختر الحالة</option>
-                        <option value="سليم">سليم</option>
+                    <label for="valveCondition" class="form-label required">حالة المحبس</label>
+                    <select id="valveCondition" class="form-select" required>
+                        <option value="">اختر حالة المحبس</option>
+                        <option value="سليم" selected>سليم</option>
                         <option value="يحتاج تغيير">يحتاج تغيير</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">حالة الصندوق</label>
-                    <select class="form-select" id="boxCondition">
-                        <option value="">اختر الحالة</option>
-                        <option value="سليم">سليم</option>
+                    <label for="boxCondition" class="form-label required">حالة الصندوق</label>
+                    <select id="boxCondition" class="form-select" required>
+                        <option value="">اختر حالة الصندوق</option>
+                        <option value="سليم" selected>سليم</option>
                         <option value="يحتاج تغيير">يحتاج تغيير</option>
                     </select>
                 </div>
             </div>
             
             <div class="card">
-                <div class="card-title">🏠 بيانات العقار</div>
+                <div class="card-title">🏠 البيانات العقارية</div>
                 
                 <div class="form-group">
-                    <label class="form-label required">رقم القطعة</label>
-                    <input type="text" class="form-input" id="pieceNumber" placeholder="رقم القطعة العقارية">
+                    <label for="pieceNumber" class="form-label required">رقم القطعة</label>
+                    <input type="text" id="pieceNumber" class="form-input" placeholder="أدخل رقم القطعة العقارية" value="قطعة-2024" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">نوع العقار</label>
-                    <select class="form-select" id="propertyType">
-                        <option value="">اختر النوع</option>
-                        <option value="سكنى">سكني</option>
+                    <label for="propertyType" class="form-label required">نوع العقار</label>
+                    <select id="propertyType" class="form-select" required>
+                        <option value="">اختر نوع العقار</option>
+                        <option value="سكنى" selected>سكني</option>
                         <option value="تجارى">تجاري</option>
                         <option value="حكومى">حكومي</option>
                         <option value="VIP">VIP</option>
@@ -510,10 +908,10 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">حالة العقار</label>
-                    <select class="form-select" id="propertyCondition">
-                        <option value="">اختر الحالة</option>
-                        <option value="عقار قائم">عقار قائم</option>
+                    <label for="propertyCondition" class="form-label required">حالة العقار</label>
+                    <select id="propertyCondition" class="form-select" required>
+                        <option value="">اختر حالة العقار</option>
+                        <option value="عقار قائم" selected>عقار قائم</option>
                         <option value="ارض فضاء">أرض فضاء</option>
                         <option value="عقار مهدوم">عقار مهدوم</option>
                         <option value="عقار تحت الانشاء">عقار تحت الإنشاء</option>
@@ -521,31 +919,36 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">يوجد تعدي</label>
-                    <select class="form-select" id="hasViolation">
-                        <option value="">اختر</option>
-                        <option value="لا">لا</option>
+                    <label for="hasViolation" class="form-label required">يوجد تعدي</label>
+                    <select id="hasViolation" class="form-select" required>
+                        <option value="">اختر حالة التعدي</option>
+                        <option value="لا" selected>لا</option>
                         <option value="نعم">نعم</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">اسم الحي</label>
-                    <input type="text" class="form-input" id="districtName" placeholder="اسم الحي/المنطقة">
+                    <label for="districtName" class="form-label required">اسم الحي</label>
+                    <input type="text" id="districtName" class="form-input" placeholder="أدخل اسم الحي أو المنطقة" value="حي النخيل" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label required">عدد عدادات الكهرباء</label>
-                    <input type="number" class="form-input" id="electricityMetersCount" min="1" value="1">
+                    <label for="electricityMetersCount" class="form-label required">عدد عدادات الكهرباء</label>
+                    <input type="number" id="electricityMetersCount" class="form-input" min="1" max="100" value="2" required>
                 </div>
             </div>
             
             <div class="card">
-                <div class="card-title">👤 بيانات الفني</div>
+                <div class="card-title">👤 بيانات الفني المسؤول</div>
                 
                 <div class="form-group">
-                    <label class="form-label required">اسم الفني</label>
-                    <input type="text" class="form-input" id="technicianName" placeholder="اسم الفني المسؤول">
+                    <label for="technicianName" class="form-label required">اسم الفني</label>
+                    <input type="text" id="technicianName" class="form-input" placeholder="أدخل اسم الفني المسؤول" value="أحمد محمد" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="technicianNotes" class="form-label">ملاحظات إضافية</label>
+                    <textarea id="technicianNotes" class="form-textarea" placeholder="أي ملاحظات إضافية أو observations..."></textarea>
                 </div>
             </div>
         </section>
@@ -553,31 +956,42 @@
         <!-- صفحة الصور -->
         <section id="camera" class="page">
             <div class="card">
-                <div class="card-title">📷 التقاط الصور</div>
-                <p style="text-align: center; margin-bottom: 20px; color: #666;">
-                    يمكنك التقاط الصور المطلوبة مباشرة من الكاميرا
+                <div class="card-title">📷 نظام التقاط الصور</div>
+                <p style="text-align: center; margin-bottom: 20px; color: var(--text-light); line-height: 1.6;">
+                    يمكنك التقاط الصور المطلوبة مباشرة من كاميرا الجوال<br>
+                    سيتم رفع الصور تلقائياً إلى السحابة وحفظ روابطها
                 </p>
                 
                 <div class="camera-section">
                     <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
                     <canvas id="cameraCanvas" style="display: none;"></canvas>
                     
-                    <select class="form-select" id="photoType" style="margin-bottom: 15px;">
-                        <option value="">اختر نوع الصورة</option>
-                        <option value="meterImage">صورة العداد</option>
-                        <option value="pieceNumberImage">صورة رقم القطعة</option>
-                        <option value="propertyImage">صورة العقار</option>
-                        <option value="valveImage">صورة المحبس</option>
-                        <option value="boxImage">صورة الصندوق</option>
-                        <option value="violationImage">صورة التعدي</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="photoType" class="form-label required">نوع الصورة المطلوبة</label>
+                        <select id="photoType" class="form-select" required>
+                            <option value="">اختر نوع الصورة</option>
+                            <option value="meterImage">صورة العداد</option>
+                            <option value="pieceNumberImage">صورة رقم القطعة</option>
+                            <option value="propertyImage">صورة العقار</option>
+                            <option value="valveImage">صورة المحبس</option>
+                            <option value="boxImage">صورة الصندوق</option>
+                            <option value="violationImage">صورة التعدي</option>
+                            <option value="metersCountImage">صورة عدد العدادات</option>
+                        </select>
+                    </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button class="btn btn-info" onclick="startCamera()">
+                    <div class="btn-group">
+                        <button class="btn btn-info" onclick="startCamera()" id="startCameraBtn">
                             📸 فتح الكاميرا
                         </button>
-                        <button class="btn btn-success" onclick="capturePhoto()" style="display: none;" id="captureBtn">
-                            ✅ التقاط
+                        <button class="btn btn-success" onclick="capturePhoto()" id="captureBtn" style="display: none;">
+                            ✅ التقاط صورة
+                        </button>
+                    </div>
+                    
+                    <div class="btn-group btn-group-full">
+                        <button class="btn btn-warning" onclick="stopCamera()" id="stopCameraBtn" style="display: none;">
+                            ❌ إغلاق الكاميرا
                         </button>
                     </div>
                 </div>
@@ -585,8 +999,23 @@
             
             <div class="card">
                 <div class="card-title">🖼️ الصور الملتقطة</div>
+                <p style="text-align: center; margin-bottom: 15px; color: var(--text-light);">
+                    الصور التي تم التقاطها ستظهر هنا<br>
+                    يمكنك حذف أي صورة بالنقر على زر ❌
+                </p>
+                
                 <div class="image-grid" id="capturedImages">
-                    <!-- الصور الملتقطة تظهر هنا -->
+                    <!-- الصور الملتقطة تظهر هنا dynamically -->
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-light);">
+                        <div style="font-size: 3em; margin-bottom: 10px;">📷</div>
+                        <div>لم يتم التقاط أي صور بعد</div>
+                    </div>
+                </div>
+                
+                <div class="btn-group btn-group-full">
+                    <button class="btn btn-danger" onclick="clearAllImages()">
+                        🗑️ مسح جميع الصور
+                    </button>
                 </div>
             </div>
         </section>
@@ -595,61 +1024,129 @@
         <section id="location" class="page">
             <div class="card location-card">
                 <div class="card-title">📍 الموقع الجغرافي</div>
-                <p style="text-align: center; margin-bottom: 20px; color: #666;">
-                    اضغط على الزر أدناه للحصول على الموقع الحالي تلقائياً
+                <p style="text-align: center; margin-bottom: 20px; color: var(--text-light); line-height: 1.6;">
+                    سيتم تحديد موقعك الجغرافي تلقائياً باستخدام GPS<br>
+                    تأكد من تفعيل خدمة الموقع في جوالك
                 </p>
                 
-                <button class="btn btn-info" onclick="getCurrentLocation()">
-                    📍 الحصول على الموقع
-                </button>
+                <div class="btn-group btn-group-full">
+                    <button class="btn btn-info" onclick="getCurrentLocation()">
+                        📍 الحصول على الموقع الحالي
+                    </button>
+                </div>
                 
-                <div class="coordinates" style="margin-top: 20px;">
+                <div class="coordinates-grid">
                     <div class="form-group">
-                        <label class="form-label">خط العرض</label>
-                        <input type="text" class="form-input" id="latitude" readonly>
+                        <label for="latitude" class="form-label required">خط العرض (Latitude)</label>
+                        <input type="text" id="latitude" class="form-input" readonly value="24.7136">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">خط الطول</label>
-                        <input type="text" class="form-input" id="longitude" readonly>
+                        <label for="longitude" class="form-label required">خط الطول (Longitude)</label>
+                        <input type="text" id="longitude" class="form-input" readonly value="46.6753">
                     </div>
                 </div>
                 
-                <div id="locationStatus" style="text-align: center; margin-top: 15px; font-size: 0.9em;"></div>
+                <div id="locationStatus" class="location-status">
+                    ⏳ اضغط على الزر أعلاه للحصول على الموقع
+                </div>
+                
+                <div class="form-group">
+                    <label for="locationAccuracy" class="form-label">دقة الموقع</label>
+                    <input type="text" id="locationAccuracy" class="form-input" readonly value="غير محدد">
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">🗺️ معلومات الموقع</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 4em; margin-bottom: 15px;">🌍</div>
+                    <p style="color: var(--text-light); margin-bottom: 15px;">
+                        الموقع الجغرافي يساعد في تتبع وتحديد مواقع العدادات بدقة
+                    </p>
+                    <div style="background: var(--info-bg); padding: 15px; border-radius: 10px; border-left: 4px solid var(--info-color);">
+                        <strong>ملاحظة:</strong> الدقة العالية للموقع تتطلب اتصالاً جيداً بالإنترنت وتفعيل GPS
+                    </div>
+                </div>
             </div>
         </section>
         
         <!-- صفحة الإرسال -->
         <section id="submit" class="page">
             <div class="card">
-                <div class="card-title">✅ مراجعة وإرسال</div>
+                <div class="card-title">✅ مراجعة وإرسال البيانات</div>
+                <p style="text-align: center; margin-bottom: 20px; color: var(--text-light);">
+                    راجع البيانات المدخلة قبل الإرسال النهائي<br>
+                    تأكد من صحة جميع المعلومات
+                </p>
                 
-                <div id="reviewData">
-                    <!-- البيانات المعاينة تظهر هنا -->
+                <div class="review-section" id="reviewData">
+                    <!-- بيانات المراجعة تظهر هنا dynamically -->
+                    <div style="text-align: center; padding: 30px; color: var(--text-light);">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📋</div>
+                        <div>جاري تحميل بيانات المراجعة...</div>
+                    </div>
                 </div>
                 
-                <div class="progress-bar">
-                    <div class="progress" id="submitProgress"></div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="submitProgress"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">جاهز للإرسال</div>
                 </div>
                 
                 <div class="loading" id="submitLoading">
                     <div class="spinner"></div>
-                    <div>جاري حفظ البيانات...</div>
+                    <div class="loading-text">جاري معالجة البيانات وحفظها...</div>
                 </div>
                 
                 <div id="submitMessage"></div>
                 
-                <button class="btn btn-success" onclick="submitAllData()">
-                    💾 حفظ في Google Sheets
-                </button>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="submitAllData()" id="submitBtn">
+                        💾 حفظ في جوجل شيت
+                    </button>
+                    
+                    <button class="btn btn-info" onclick="testSubmission()">
+                        🧪 اختبار إرسال
+                    </button>
+                </div>
                 
-                <button class="btn btn-warning" onclick="testSubmission()">
-                    🧪 اختبار سريع
-                </button>
+                <div class="btn-group btn-group-full">
+                    <button class="btn btn-warning" onclick="validateForm()">
+                        🔍 فحص البيانات
+                    </button>
+                    
+                    <button class="btn btn-danger" onclick="clearForm()">
+                        🗑️ مسح الكل
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">📊 حالة النظام</div>
+                <div id="systemStatus">
+                    <div class="review-item">
+                        <span class="review-label">اتصال الخدمة:</span>
+                        <span class="review-value" id="serviceStatus">🔄 جاري الفحص...</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">جوجل شيت:</span>
+                        <span class="review-value" id="sheetStatus">🔗 متصل</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">رفع الصور:</span>
+                        <span class="review-value" id="imageUploadStatus">✅ مفعل</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">آخر تحديث:</span>
+                        <span class="review-value" id="lastUpdateStatus">--:--:--</span>
+                    </div>
+                </div>
             </div>
         </section>
         
-        <!-- التذييل -->
+        <!-- تذييل التطبيق -->
         <footer class="app-footer">
             <button class="btn btn-primary footer-btn" onclick="showPage('data-entry')">
                 📝 بيانات
@@ -666,189 +1163,428 @@
         </footer>
     </div>
 
+    <!-- الكود JavaScript الكامل -->
     <script>
-        // الرابط الجديد لـ Google Apps Script
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyv1SFSQv1mtAcQ0VrjjcelGDNt5-Xw-Rb2z7NB3JbFTf-Y_G77nv8PFSAqzcNIKgTcQ/exec';
+        // =============================================
+        // الإعدادات العامة والمتغيرات
+        // =============================================
         
+        // رابط Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx40M3V5sAuEUff9cfuTjduxOe1rxu4u13KiIvJvvnmVVV9jAotqqT8COYb6J1ACMdA2w/exec';
+        
+        // متغيرات التطبيق
         let currentStream = null;
         let capturedImages = {};
-
-        // إدارة الصفحات
+        let currentLocation = null;
+        let isOnline = navigator.onLine;
+        
+        // =============================================
+        // دوال إدارة الصفحات والواجهة
+        // =============================================
+        
+        // عرض صفحة محددة وإخفاء الآخرين
         function showPage(pageId) {
+            console.log('🔄 تبديل إلى الصفحة: ' + pageId);
+            
             // إخفاء جميع الصفحات
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
             
             // إظهار الصفحة المطلوبة
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
             
-            // تحديث التبويبات
+            // تحديث حالة التبويبات
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
             
-            // إذا كانت صفحة المراجعة، تحديث البيانات
-            if (pageId === 'submit') {
-                updateReviewData();
+            // إضافة active للتبويب الحالي
+            const activeTab = [...document.querySelectorAll('.nav-tab')].find(tab => 
+                tab.textContent.includes(event.target.textContent)
+            );
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+            
+            // إجراءات خاصة بكل صفحة
+            handlePageSpecificActions(pageId);
+        }
+        
+        // معالجة الإجراءات الخاصة بكل صفحة
+        function handlePageSpecificActions(pageId) {
+            switch(pageId) {
+                case 'submit':
+                    updateReviewData();
+                    updateSystemStatus();
+                    break;
+                case 'camera':
+                    stopCamera(); // إيقاف الكاميرا إذا كانت تعمل
+                    break;
+                case 'location':
+                    updateLocationStatus();
+                    break;
             }
         }
-
-        // الكاميرا
+        
+        // تحديث حالة النظام
+        function updateSystemStatus() {
+            const now = new Date();
+            document.getElementById('lastUpdateStatus').textContent = now.toLocaleTimeString();
+            
+            // تحديث حالة الاتصال
+            const connectionStatus = document.getElementById('connectionStatus').textContent;
+            document.getElementById('serviceStatus').textContent = connectionStatus;
+            
+            // تحديث حالة الصور
+            const imageCount = Object.keys(capturedImages).length;
+            document.getElementById('imageUploadStatus').textContent = 
+                imageCount > 0 ? `✅ ${imageCount} صورة` : '⚡ جاهز';
+        }
+        
+        // =============================================
+        // دوال إدارة الكاميرا والصور
+        // =============================================
+        
+        // بدء تشغيل الكاميرا
         async function startCamera() {
             const photoType = document.getElementById('photoType').value;
             if (!photoType) {
-                showMessage('يرجى اختيار نوع الصورة أولاً', 'error');
+                showMessage('⚠️ يرجى اختيار نوع الصورة أولاً', 'warning');
                 return;
             }
             
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
+                console.log('📷 جاري تشغيل الكاميرا...');
+                
+                const constraints = {
+                    video: {
                         facingMode: 'environment',
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
-                    } 
-                });
+                    },
+                    audio: false
+                };
                 
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 currentStream = stream;
+                
                 const preview = document.getElementById('cameraPreview');
                 preview.srcObject = stream;
-                preview.style.display = 'block';
-                document.getElementById('captureBtn').style.display = 'inline-block';
+                preview.classList.add('active');
+                
+                // إظهار وإخفاء الأزرار المناسبة
+                document.getElementById('startCameraBtn').style.display = 'none';
+                document.getElementById('captureBtn').style.display = 'inline-flex';
+                document.getElementById('stopCameraBtn').style.display = 'inline-flex';
+                
+                showMessage('✅ الكاميرا جاهزة للتصوير', 'success');
                 
             } catch (error) {
-                showMessage('خطأ في فتح الكاميرا: ' + error.message, 'error');
+                console.error('❌ خطأ في تشغيل الكاميرا:', error);
+                let errorMessage = 'تعذر فتح الكاميرا: ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'تم رفض الإذن. يرجى السماح باستخدام الكاميرا.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'لم يتم العثور على كاميرا.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMessage += 'المتصفح لا يدعم الكاميرا.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showMessage(errorMessage, 'error');
             }
         }
-
+        
+        // التقاط صورة من الكاميرا
         function capturePhoto() {
             const photoType = document.getElementById('photoType').value;
             const preview = document.getElementById('cameraPreview');
             const canvas = document.getElementById('cameraCanvas');
             const context = canvas.getContext('2d');
             
-            canvas.width = preview.videoWidth;
-            canvas.height = preview.videoHeight;
-            context.drawImage(preview, 0, 0);
+            if (!preview.srcObject) {
+                showMessage('⚠️ الكاميرا غير نشطة', 'warning');
+                return;
+            }
             
-            const imageData = canvas.toDataURL('image/jpeg', 0.8);
-            capturedImages[photoType] = imageData;
-            
-            // عرض الصورة الملتقطة
-            displayCapturedImage(photoType, imageData);
-            
-            // إيقاف الكاميرا
-            stopCamera();
-            
-            showMessage('تم التقاط الصورة بنجاح', 'success');
+            try {
+                // ضبط أبعاد canvas لتتناسب مع الفيديو
+                canvas.width = preview.videoWidth;
+                canvas.height = preview.videoHeight;
+                
+                // رسم الإطار الحالي على canvas
+                context.drawImage(preview, 0, 0, canvas.width, canvas.height);
+                
+                // تحويل إلى Base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.85);
+                
+                // حفظ الصورة
+                capturedImages[photoType] = imageData;
+                
+                // عرض الصورة الملتقطة
+                displayCapturedImage(photoType, imageData);
+                
+                showMessage(`✅ تم التقاط صورة ${getArabicImageName(photoType)}`, 'success');
+                
+                // إيقاف الكاميرا بعد الالتقاط
+                stopCamera();
+                
+                // إعادة تعيين نوع الصورة
+                document.getElementById('photoType').value = '';
+                
+            } catch (error) {
+                console.error('❌ خطأ في التقاط الصورة:', error);
+                showMessage('❌ فشل في التقاط الصورة', 'error');
+            }
         }
-
+        
+        // إيقاف الكاميرا
         function stopCamera() {
             if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
+                currentStream.getTracks().forEach(track => {
+                    track.stop();
+                });
+                currentStream = null;
             }
-            document.getElementById('cameraPreview').style.display = 'none';
+            
+            const preview = document.getElementById('cameraPreview');
+            preview.srcObject = null;
+            preview.classList.remove('active');
+            
+            // إعادة الأزرار إلى حالتها الأصلية
+            document.getElementById('startCameraBtn').style.display = 'inline-flex';
             document.getElementById('captureBtn').style.display = 'none';
+            document.getElementById('stopCameraBtn').style.display = 'none';
         }
-
+        
+        // عرض الصورة الملتقطة في الشبكة
         function displayCapturedImage(type, imageData) {
             const imagesContainer = document.getElementById('capturedImages');
+            
+            // إزالة رسالة "لا توجد صور" إذا كانت موجودة
+            if (imagesContainer.querySelector('div') && !imagesContainer.querySelector('.image-item')) {
+                imagesContainer.innerHTML = '';
+            }
+            
             const imageItem = document.createElement('div');
             imageItem.className = 'image-item';
-            
-            const imageName = getImageName(type);
-            
             imageItem.innerHTML = `
-                <img src="${imageData}" class="captured-image" alt="${imageName}">
-                <button class="remove-image" onclick="removeImage('${type}')">×</button>
-                <div style="text-align: center; font-size: 0.8em; margin-top: 5px;">${imageName}</div>
+                <img src="${imageData}" class="captured-image" alt="${getArabicImageName(type)}">
+                <button type="button" class="remove-image" onclick="removeImage('${type}')" title="حذف الصورة">
+                    ×
+                </button>
+                <span class="image-label">${getArabicImageName(type)}</span>
             `;
             
             imagesContainer.appendChild(imageItem);
         }
-
-        function getImageName(type) {
+        
+        // الحصول على الاسم العربي لنوع الصورة
+        function getArabicImageName(type) {
             const names = {
                 'meterImage': 'العداد',
                 'pieceNumberImage': 'رقم القطعة',
                 'propertyImage': 'العقار',
                 'valveImage': 'المحبس',
                 'boxImage': 'الصندوق',
-                'violationImage': 'التعدي'
+                'violationImage': 'التعدي',
+                'metersCountImage': 'عدد العدادات'
             };
             return names[type] || type;
         }
-
+        
+        // إزالة صورة محددة
         function removeImage(type) {
-            delete capturedImages[type];
-            updateCapturedImagesDisplay();
+            if (capturedImages[type]) {
+                delete capturedImages[type];
+                updateCapturedImagesDisplay();
+                showMessage(`🗑️ تم حذف صورة ${getArabicImageName(type)}`, 'info');
+            }
         }
-
+        
+        // مسح جميع الصور
+        function clearAllImages() {
+            if (Object.keys(capturedImages).length === 0) {
+                showMessage('ℹ️ لا توجد صور لمسحها', 'info');
+                return;
+            }
+            
+            if (confirm('هل أنت متأكد من مسح جميع الصور؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                capturedImages = {};
+                updateCapturedImagesDisplay();
+                showMessage('🗑️ تم مسح جميع الصور', 'success');
+            }
+        }
+        
+        // تحديث عرض الصور الملتقطة
         function updateCapturedImagesDisplay() {
             const container = document.getElementById('capturedImages');
             container.innerHTML = '';
             
-            Object.keys(capturedImages).forEach(type => {
-                displayCapturedImage(type, capturedImages[type]);
-            });
-        }
-
-        // الموقع
-        function getCurrentLocation() {
-            const statusDiv = document.getElementById('locationStatus');
-            statusDiv.innerHTML = 'جاري تحديد الموقع...';
+            const imageTypes = Object.keys(capturedImages);
             
-            if (!navigator.geolocation) {
-                statusDiv.innerHTML = 'المتصفح لا يدعم تحديد الموقع';
+            if (imageTypes.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-light);">
+                        <div style="font-size: 3em; margin-bottom: 10px;">📷</div>
+                        <div>لم يتم التقاط أي صور بعد</div>
+                    </div>
+                `;
                 return;
             }
             
+            imageTypes.forEach(type => {
+                displayCapturedImage(type, capturedImages[type]);
+            });
+        }
+        
+        // =============================================
+        // دوال الموقع الجغرافي
+        // =============================================
+        
+        // الحصول على الموقع الحالي
+        function getCurrentLocation() {
+            const statusDiv = document.getElementById('locationStatus');
+            statusDiv.innerHTML = '⏳ جاري تحديد الموقع...';
+            statusDiv.style.color = 'var(--info-color)';
+            
+            if (!navigator.geolocation) {
+                statusDiv.innerHTML = '❌ المتصفح لا يدعم خدمة الموقع';
+                statusDiv.style.color = 'var(--danger-color)';
+                return;
+            }
+            
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 60000
+            };
+            
             navigator.geolocation.getCurrentPosition(
+                // النجاح
                 function(position) {
                     const lat = position.coords.latitude.toFixed(6);
                     const lng = position.coords.longitude.toFixed(6);
+                    const accuracy = position.coords.accuracy.toFixed(1);
                     
                     document.getElementById('latitude').value = lat;
                     document.getElementById('longitude').value = lng;
+                    document.getElementById('locationAccuracy').value = `${accuracy} متر`;
                     
-                    statusDiv.innerHTML = `✅ تم تحديد الموقع: ${lat}, ${lng}`;
-                    statusDiv.style.color = 'green';
+                    currentLocation = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: accuracy
+                    };
+                    
+                    statusDiv.innerHTML = `✅ تم تحديد الموقع بدقة ${accuracy} متر`;
+                    statusDiv.style.color = 'var(--success-color)';
+                    
+                    showMessage(`📍 تم تحديد الموقع: ${lat}, ${lng}`, 'success');
                 },
+                // الفشل
                 function(error) {
-                    let errorMsg = 'فشل في تحديد الموقع: ';
+                    let errorMessage = '❌ فشل في تحديد الموقع: ';
+                    
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            errorMsg += 'تم رفض الإذن';
+                            errorMessage += 'تم رفض الإذن. يرجى السماح بالوصول إلى الموقع.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMsg += 'الموقع غير متاح';
+                            errorMessage += 'معلومات الموقع غير متاحة. تأكد من تفعيل GPS.';
                             break;
                         case error.TIMEOUT:
-                            errorMsg += 'انتهت المهلة';
+                            errorMessage += 'انتهت مهلة طلب الموقع. حاول مرة أخرى.';
                             break;
                         default:
-                            errorMsg += 'خطأ غير معروف';
+                            errorMessage += 'خطأ غير متوقع.';
                     }
-                    statusDiv.innerHTML = errorMsg;
-                    statusDiv.style.color = 'red';
+                    
+                    statusDiv.innerHTML = errorMessage;
+                    statusDiv.style.color = 'var(--danger-color)';
+                    
+                    showMessage(errorMessage, 'error');
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 0
-                }
+                options
             );
         }
-
-        // المراجعة والإرسال
+        
+        // تحديث حالة الموقع
+        function updateLocationStatus() {
+            if (currentLocation) {
+                document.getElementById('locationStatus').innerHTML = 
+                    `✅ الموقع محدد: ${currentLocation.latitude}, ${currentLocation.longitude}`;
+            }
+        }
+        
+        // =============================================
+        // دوال التحقق من البيانات والإرسال
+        // =============================================
+        
+        // التحقق من صحة النموذج
+        function validateForm() {
+            const requiredFields = [
+                { id: 'meterNumber', name: 'رقم العداد' },
+                { id: 'meterType', name: 'نوع العداد' },
+                { id: 'meterBrand', name: 'ماركة العداد' },
+                { id: 'valveType', name: 'نوع المحبس' },
+                { id: 'valveCondition', name: 'حالة المحبس' },
+                { id: 'boxCondition', name: 'حالة الصندوق' },
+                { id: 'pieceNumber', name: 'رقم القطعة' },
+                { id: 'propertyType', name: 'نوع العقار' },
+                { id: 'propertyCondition', name: 'حالة العقار' },
+                { id: 'hasViolation', name: 'حالة التعدي' },
+                { id: 'districtName', name: 'اسم الحي' },
+                { id: 'electricityMetersCount', name: 'عدد العدادات' },
+                { id: 'technicianName', name: 'اسم الفني' }
+            ];
+            
+            const errors = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    errors.push(`حقل ${field.name} مطلوب`);
+                    element.style.borderColor = 'var(--danger-color)';
+                } else {
+                    element.style.borderColor = '';
+                }
+            });
+            
+            // التحقق من الموقع
+            const lat = document.getElementById('latitude').value;
+            const lng = document.getElementById('longitude').value;
+            if (!lat || !lng) {
+                errors.push('الموقع الجغرافي مطلوب');
+            }
+            
+            if (errors.length > 0) {
+                showMessage(`❌ يوجد ${errors.length} أخطاء في البيانات:<br>• ${errors.join('<br>• ')}`, 'error');
+                return false;
+            } else {
+                showMessage('✅ جميع البيانات صحيحة وجاهزة للإرسال', 'success');
+                return true;
+            }
+        }
+        
+        // تحديث بيانات المراجعة
         function updateReviewData() {
             const reviewDiv = document.getElementById('reviewData');
-            let html = '';
+            
+            let html = `
+                <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color);">
+                    <h3 style="color: var(--primary-color); margin-bottom: 10px;">📊 ملخص البيانات</h3>
+                </div>
+            `;
             
             // البيانات الأساسية
-            const fields = [
+            const reviewFields = [
                 { id: 'meterNumber', label: 'رقم العداد' },
                 { id: 'meterType', label: 'نوع العداد' },
                 { id: 'meterBrand', label: 'ماركة العداد' },
@@ -861,46 +1597,55 @@
                 { id: 'hasViolation', label: 'يوجد تعدي' },
                 { id: 'districtName', label: 'اسم الحي' },
                 { id: 'electricityMetersCount', label: 'عدد العدادات' },
+                { id: 'technicianName', label: 'اسم الفني' },
                 { id: 'latitude', label: 'خط العرض' },
-                { id: 'longitude', label: 'خط الطول' },
-                { id: 'technicianName', label: 'اسم الفني' }
+                { id: 'longitude', label: 'خط الطول' }
             ];
             
-            fields.forEach(field => {
+            reviewFields.forEach(field => {
                 const value = document.getElementById(field.id).value || 'غير محدد';
-                html += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
-                    <span style="font-weight: 500;">${field.label}:</span>
-                    <span>${value}</span>
-                </div>`;
+                html += `
+                    <div class="review-item">
+                        <span class="review-label">${field.label}:</span>
+                        <span class="review-value">${value}</span>
+                    </div>
+                `;
             });
             
-            // الصور
+            // الصور الملتقطة
             const imageCount = Object.keys(capturedImages).length;
-            html += `<div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
-                <span style="font-weight: 500;">عدد الصور:</span>
-                <span>${imageCount}</span>
-            </div>`;
+            html += `
+                <div class="review-item">
+                    <span class="review-label">عدد الصور:</span>
+                    <span class="review-value">${imageCount} صورة</span>
+                </div>
+            `;
+            
+            if (imageCount > 0) {
+                html += `<div style="margin-top: 15px; color: var(--text-light); font-size: 0.9em;">
+                    📷 الصور الملتقطة: ${Object.keys(capturedImages).map(getArabicImageName).join('، ')}
+                </div>`;
+            }
             
             reviewDiv.innerHTML = html;
         }
-
+        
+        // إرسال البيانات الكاملة
         async function submitAllData() {
-            const loadingDiv = document.getElementById('submitLoading');
-            const progressBar = document.getElementById('submitProgress');
-            const messageDiv = document.getElementById('submitMessage');
-            
-            // التحقق من البيانات المطلوبة
-            const requiredFields = ['meterNumber', 'meterType', 'technicianName'];
-            for (const field of requiredFields) {
-                if (!document.getElementById(field).value) {
-                    showMessage(`يرجى ملء حقل ${field}`, 'error', messageDiv);
-                    return;
-                }
+            if (!validateForm()) {
+                showMessage('❌ يرجى تصحيح الأخطاء قبل الإرسال', 'error', 'submitMessage');
+                return;
             }
             
-            // إظهار التحميل
-            loadingDiv.style.display = 'block';
-            progressBar.style.width = '30%';
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingDiv = document.getElementById('submitLoading');
+            const progressBar = document.getElementById('submitProgress');
+            const progressText = document.getElementById('progressText');
+            const messageDiv = document.getElementById('submitMessage');
+            
+            // تعطيل زر الإرسال وإظهار التحميل
+            submitBtn.disabled = true;
+            loadingDiv.classList.add('active');
             
             try {
                 // تجميع البيانات
@@ -920,13 +1665,18 @@
                     latitude: document.getElementById('latitude').value,
                     longitude: document.getElementById('longitude').value,
                     technicianName: document.getElementById('technicianName').value,
+                    technicianNotes: document.getElementById('technicianNotes').value,
                     timestamp: new Date().toISOString(),
                     ...capturedImages
                 };
                 
-                progressBar.style.width = '60%';
+                console.log('📤 جاري إرسال البيانات:', formData);
                 
-                // الإرسال
+                // تحديث شريط التقدم
+                progressBar.style.width = '30%';
+                progressText.textContent = 'جاري تجهيز البيانات...';
+                
+                // إرسال البيانات
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
@@ -936,42 +1686,58 @@
                     body: JSON.stringify(formData)
                 });
                 
-                progressBar.style.width = '90%';
+                progressBar.style.width = '70%';
+                progressText.textContent = 'جاري حفظ البيانات...';
                 
                 if (!response.ok) {
-                    throw new Error(`خطأ في الاستجابة: ${response.status}`);
+                    throw new Error(`خطأ في الاستجابة: ${response.status} ${response.statusText}`);
                 }
                 
                 const result = await response.json();
+                
                 progressBar.style.width = '100%';
+                progressText.textContent = 'اكتمل الإرسال';
                 
                 if (result.success) {
-                    showMessage(`✅ ${result.message}`, 'success', messageDiv);
-                    // إعادة تعيين النموذج بعد نجاح الحفظ
+                    const successMessage = `✅ ${result.message}` + 
+                        (result.imageCount ? ` - تم رفع ${result.imageCount} صورة` : '');
+                    
+                    showMessage(successMessage, 'success', 'submitMessage');
+                    
+                    // إعادة تعيين النموذج بعد النجاح
                     setTimeout(() => {
                         resetForm();
                         showPage('data-entry');
-                    }, 2000);
+                    }, 3000);
+                    
                 } else {
-                    showMessage(`❌ ${result.error}`, 'error', messageDiv);
+                    showMessage(`❌ ${result.error}`, 'error', 'submitMessage');
                 }
                 
             } catch (error) {
-                showMessage(`❌ خطأ في الإرسال: ${error.message}`, 'error', messageDiv);
+                console.error('❌ خطأ في الإرسال:', error);
+                showMessage(`❌ فشل في الإرسال: ${error.message}`, 'error', 'submitMessage');
+                
             } finally {
-                loadingDiv.style.display = 'none';
+                // إعادة تمكين زر الإرسال وإخفاء التحميل
+                submitBtn.disabled = false;
+                loadingDiv.classList.remove('active');
+                
+                // إعادة تعيين شريط التقدم بعد ثانية
                 setTimeout(() => {
                     progressBar.style.width = '0%';
+                    progressText.textContent = 'جاهز للإرسال';
                 }, 1000);
             }
         }
-
+        
+        // اختبار الإرسال
         async function testSubmission() {
             const testData = {
                 meterNumber: 'TEST-' + Date.now(),
                 meterType: 'ذكى',
                 meterBrand: 'هيدروس',
-                technicianName: 'اختبار جوال',
+                technicianName: 'اختبار النظام',
                 timestamp: new Date().toISOString()
             };
             
@@ -985,57 +1751,127 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showMessage(`✅ الاختبار ناجح: ${result.message}`, 'success', document.getElementById('submitMessage'));
+                    showMessage(`✅ الاختبار ناجح: ${result.message}`, 'success', 'submitMessage');
                 } else {
-                    showMessage(`❌ فشل الاختبار: ${result.error}`, 'error', document.getElementById('submitMessage'));
+                    showMessage(`❌ فشل الاختبار: ${result.error}`, 'error', 'submitMessage');
                 }
                 
             } catch (error) {
-                showMessage(`❌ خطأ في الاختبار: ${error.message}`, 'error', document.getElementById('submitMessage'));
+                showMessage(`❌ خطأ في الاختبار: ${error.message}`, 'error', 'submitMessage');
             }
         }
-
-        function resetForm() {
-            // مسح جميع الحقول
-            document.querySelectorAll('input, select').forEach(input => {
-                if (input.type !== 'button') {
-                    input.value = '';
+        
+        // مسح النموذج بالكامل
+        function clearForm() {
+            if (!confirm('هل أنت متأكد من مسح جميع البيانات؟ سيتم فقدان جميع المعلومات المدخلة.')) {
+                return;
+            }
+            
+            // مسح حقول الإدخال
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                if (element.type !== 'button') {
+                    element.value = '';
                 }
             });
             
             // إعادة تعيين القيم الافتراضية
             document.getElementById('electricityMetersCount').value = '1';
             document.getElementById('hasViolation').value = 'لا';
+            document.getElementById('latitude').value = '24.7136';
+            document.getElementById('longitude').value = '46.6753';
             
             // مسح الصور
             capturedImages = {};
             updateCapturedImagesDisplay();
             
-            showMessage('تم مسح النموذج بنجاح', 'success');
-        }
-
-        function showMessage(message, type, container = null) {
-            const messageDiv = container || document.getElementById('submitMessage');
-            const className = type === 'error' ? 'message-error' : 'message-success';
-            messageDiv.innerHTML = `<div class="message ${className}">${message}</div>`;
-        }
-
-        // التهيئة
-        document.addEventListener('DOMContentLoaded', function() {
-            // تعيين القيم الافتراضية
-            document.getElementById('hasViolation').value = 'لا';
+            // إيقاف الكاميرا إذا كانت تعمل
+            stopCamera();
             
-            // إضافة تأثيرات لللمس
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.addEventListener('touchstart', function() {
-                    this.style.transform = 'scale(0.98)';
-                });
+            showMessage('🗑️ تم مسح جميع البيانات بنجاح', 'success');
+        }
+        
+        // =============================================
+        // دوال الشبكة والاتصال
+        // =============================================
+        
+        // اختبار الاتصال بالخدمة
+        async function testConnection() {
+            const statusDiv = document.getElementById('connectionStatus');
+            
+            try {
+                statusDiv.innerHTML = '🔄 جاري اختبار الاتصال...';
+                statusDiv.style.color = 'orange';
                 
-                btn.addEventListener('touchend', function() {
-                    this.style.transform = 'scale(1)';
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+                const startTime = Date.now();
+                const response = await fetch(SCRIPT_URL);
+                const endTime = Date.now();
+                
+                if (!response.ok) {
+                    throw new Error(`خطأ ${response.status}`);
+                }
+                
+                const result = await response.json();
+                const responseTime = endTime - startTime;
+                
+                if (result.success) {
+                    statusDiv.innerHTML = `✅ اتصال ناجح (${responseTime}ms)`;
+                    statusDiv.style.color = 'lightgreen';
+                    showMessage('✅ اتصال الخدمة يعمل بشكل طبيعي', 'success');
+                } else {
+                    statusDiv.innerHTML = '⚠️ اتصال مع تحذير';
+                    statusDiv.style.color = 'orange';
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('❌ فشل الاتصال:', error);
+                statusDiv.innerHTML = '❌ فشل الاتصال';
+                statusDiv.style.color = 'red';
+                showMessage('❌ تعذر الاتصال بالخدمة', 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // =============================================
+        // دوال مساعدة عامة
+        // =============================================
+        
+        // عرض رسائل للمستخدم
+        function showMessage(message, type = 'info', containerId = null) {
+            const messageDiv = containerId ? document.getElementById(containerId) : document.getElementById('submitMessage');
+            if (!messageDiv) return;
+            
+            const className = `message message-${type}`;
+            messageDiv.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // إخفاء الرسالة تلقائياً بعد 5 ثوانٍ (عدا الأخطاء)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    if (messageDiv.firstChild) {
+                        messageDiv.firstChild.style.opacity = '0';
+                        setTimeout(() => {
+                            messageDiv.innerHTML = '';
+                        }, 500);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // إعادة تعيين النموذج بعد الإرسال الناجح
+        function resetForm() {
+            // مسح الحقول مع الاحتفاظ بالقيم الافتراضية
+            document.getElementById('meterNumber').value = 'TEST-' + Date.now();
+            document.getElementById('pieceNumber').value = 'قطعة-' + new Date().getFullYear();
+            document.getElementById('technicianNotes').value = '';
+            
+            // مسح الصور
+            capturedImages = {};
+            updateCapturedImagesDisplay();
+            
+            // تحديث المراجعة
+            updateReviewData();
+        }
+        
+        // =============================================
+        // مستمعي الأحداث والت
