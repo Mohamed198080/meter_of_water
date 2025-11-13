@@ -2,79 +2,175 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تسجيل عداد</title>
-  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <!-- ZXing.js -->
+  <script src="https://unpkg.com/@zxing/library@0.18.3/dist/umd/minified/zxing-library.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
-    input, button { margin: 10px; padding: 8px; }
-    #scanner { width: 100%; max-width: 600px; margin: 20px auto; }
-    #result { margin-top: 10px; color: green; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      background: #f5f5f5;
+      direction: rtl;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    #result {
+      margin-top: 15px;
+      padding: 10px;
+      background: #eaf7ea;
+      border: 1px solid #d4edda;
+      border-radius: 5px;
+      display: none;
+    }
+
+    #scanner {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #video {
+      width: 100%;
+      max-width: 400px;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      background: black;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-group button {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
 
-<h2>تسجيل بيانات العداد</h2>
+<div class="container">
 
-<input type="text" id="counterNumber" placeholder="أدخل رقم العداد" required>
-<button onclick="scanBarcode()">مسح الباركود</button>
-<button onclick="submitData()">إدخال البيانات</button>
-<div id="result"></div>
+  <h2>تسجيل بيانات العداد</h2>
 
-<div id="scanner" style="display:none;">
-  <video id="video" autoplay playsinline></video>
+  <input type="text" id="counterNumber" placeholder="أدخل رقم العداد" required>
+
+  <div class="btn-group">
+    <button onclick="scanBarcode()">مسح الباركود</button>
+    <button onclick="submitData()">إدخال البيانات</button>
+  </div>
+
+  <div id="result"></div>
+
+  <div id="scanner">
+    <video id="video" autoplay playsinline></video>
+    <button onclick="stopScanner()">إيقاف المسح</button>
+  </div>
+
 </div>
 
 <script>
-  let scanning = false;
+  let codeReader = null;
+  let isScanning = false;
+
+  function showResult(message, isError = false) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerText = message;
+    resultDiv.style.color = isError ? '#dc3545' : '#28a745';
+    resultDiv.style.display = 'block';
+    setTimeout(() => {
+      resultDiv.style.display = 'none';
+    }, 5000);
+  }
 
   function scanBarcode() {
-    if (scanning) return;
-    scanning = true;
-    document.getElementById('scanner').style.display = 'block';
+    if (isScanning) return;
 
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: document.querySelector('#video'),
-        constraints: {
-          facingMode: "environment"
-        },
-      },
-      decoder: {
-        readers: ["code_128_reader"]
-      },
-    }, function(err) {
-      if (err) {
-        console.error(err);
-        alert("خطأ في تهيئة الكاميرا");
-        scanning = false;
-        return;
-      }
-      Quagga.start();
-    });
+    const videoElement = document.getElementById('video');
+    const scannerDiv = document.getElementById('scanner');
 
-    Quagga.onDetected(function(result) {
-      const code = result.codeResult.code;
-      document.getElementById('counterNumber').value = code;
-      Quagga.stop();
+    scannerDiv.style.display = 'block';
+
+    try {
+      codeReader = new ZXing.BrowserMultiFormatReader();
+
+      codeReader.decodeFromVideoDevice(undefined, 'video', (result, err) => {
+        if (result) {
+          document.getElementById('counterNumber').value = result.text;
+          showResult(`تم مسح الباركود: ${result.text}`);
+          stopScanner();
+        } else if (err && !(err instanceof ZXing.NotFoundException)) {
+          console.error(err);
+          showResult("خطأ في مسح الباركود", true);
+          stopScanner();
+        }
+      });
+
+      isScanning = true;
+
+    } catch (error) {
+      console.error("خطأ في تهيئة الماسح:", error);
+      showResult("لا يمكن فتح الكاميرا. تأكد من السماح بالوصول إليها.", true);
+      scannerDiv.style.display = 'none';
+    }
+  }
+
+  function stopScanner() {
+    if (codeReader && isScanning) {
+      codeReader.reset();
+      isScanning = false;
       document.getElementById('scanner').style.display = 'none';
-      scanning = false;
-      document.getElementById('result').innerText = "تم مسح الباركود: " + code;
-    });
+    }
   }
 
   function submitData() {
     const counterNumber = document.getElementById('counterNumber').value.trim();
     if (!counterNumber) {
-      alert("يرجى إدخال رقم العداد");
+      showResult("يرجى إدخال رقم العداد", true);
       return;
     }
 
-    // هنا يمكنك إضافة حقول أخرى حسب الحاجة
+    // البيانات المرسلة إلى Google Sheets
     const data = {
       counter_number: counterNumber,
-      counter_type: "نوع العداد", // يمكنك إضافة حقول اختيارية
+      counter_type: "نوع العداد",
       brand: "ماركة العداد",
       sensor_type: "نوع المجس",
       sensor_status: "حالة المجس",
@@ -87,7 +183,7 @@
       nearby_meters: "0",
       latitude: "0",
       longitude: "0",
-      image_counter: "https://example.com/image1.jpg", // رابط الصورة
+      image_counter: "https://example.com/image1.jpg",
       image_part: "https://example.com/image2.jpg",
       image_property: "https://example.com/image3.jpg",
       image_box: "https://example.com/image4.jpg",
@@ -95,7 +191,10 @@
       technician_name: "اسم الفني"
     };
 
-    fetch("https://script.google.com/macros/s/AKfycbxcCArgLSfQ5qGTryNRaHxM4YJL6J-lEk9IF8owOex4Tr3VA60usd276ellJ0akw_FkIA/exec", {
+    // ⚠️ استبدل هذا الرابط برابط Web App الخاص بك
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbxcCArgLSfQ5qGTryNRaHxM4YJL6J-lEk9IF8owOex4Tr3VA60usd276ellJ0akw_FkIA/exec";
+
+    fetch(webAppUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(data)
@@ -103,15 +202,15 @@
     .then(res => res.json())
     .then(json => {
       if (json.success) {
-        document.getElementById('result').innerText = "✅ تم إرسال البيانات بنجاح!";
+        showResult("✅ تم إرسال البيانات بنجاح!");
         document.getElementById('counterNumber').value = "";
       } else {
-        document.getElementById('result').innerText = "❌ خطأ: " + json.message;
+        showResult("❌ خطأ: " + (json.message || "غير معروف"), true);
       }
     })
     .catch(err => {
-      document.getElementById('result').innerText = "❌ خطأ في الإرسال";
-      console.error(err);
+      console.error("خطأ في الإرسال:", err);
+      showResult("❌ خطأ في الإرسال. تحقق من اتصالك بالإنترنت.", true);
     });
   }
 </script>
