@@ -1,793 +1,120 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تسجيل </title>
-    <!-- إضافة مكتبة QuaggaJS لمسح الباركود -->
-    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
-    <style>
-        :root {
-            --primary: #2E7D32;
-            --secondary: #4CAF50;
-            --danger: #f44336;
-            --warning: #FF9800;
-            --info: #2196F3;
-            --dark: #1B5E20;
-            --light: #f5f5f5;
-            --text: #333;
-            --border: #ddd;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: var(--light);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-        
-        .form-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        h2 {
-            color: var(--dark);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: var(--text);
-        }
-        
-        .required::after {
-            content: " *";
-            color: var(--danger);
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-            transition: background 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn:hover {
-            background: var(--dark);
-        }
-        
-        .btn-success { background: var(--secondary); }
-        .btn-danger { background: var(--danger); }
-        .btn-warning { background: var(--warning); }
-        .btn-info { background: var(--info); }
-        
-        .barcode-section {
-            text-align: center;
-            padding: 20px;
-            background: var(--light);
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        
-        #barcode-scanner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            z-index: 1000;
-            display: none;
-        }
-        
-        #barcode-scanner video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .scanner-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-        
-        .camera-preview {
-            width: 100%;
-            max-width: 300px;
-            height: 200px;
-            background: var(--border);
-            border-radius: 8px;
-            margin: 10px auto;
-            display: none;
-            object-fit: cover;
-        }
-        
-        .captured-image {
-            width: 150px;
-            height: 120px;
-            border-radius: 6px;
-            margin: 5px;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-        }
-        
-        .image-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .image-item {
-            position: relative;
-            text-align: center;
-        }
-        
-        .remove-image {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-        }
-        
-        .message {
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 6px;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background: var(--secondary);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        #debug {
-            background: #333;
-            color: #0f0;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>تسجيل عداد</title>
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
+    input, button { margin: 10px; padding: 8px; }
+    #scanner { width: 100%; max-width: 600px; margin: 20px auto; }
+    #result { margin-top: 10px; color: green; font-weight: bold; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚡ نظام تسجيل </h1>
-        
-        <!-- قسم الباركود -->
-        <div class="form-section">
-            <h2>🔍 مسح الباركود</h2>
-            <div class="barcode-section">
-                <button class="btn btn-info" onclick="startBarcodeScanner()">
-                    📷 مسح باركود العداد
-                </button>
-                <p style="margin: 10px 0; color: #666;">أو أدخل الرقم يدوياً</p>
-            </div>
-            
-            <div class="form-group">
-                <label for="meterNumber" class="required">رقم العداد</label>
-                <input type="text" id="meterNumber" required>
-            </div>
-        </div>
 
-        <!-- بيانات العداد -->
-        <div class="form-section">
-            <h2>🔧 بيانات العداد</h2>
-            
-            <div class="form-group">
-                <label for="meterType" class="required">نوع العداد</label>
-                <select id="meterType" required>
-                    <option value="">اختر النوع</option>
-                    <option value="ذكى">عداد ذكي</option>
-                    <option value="ميكانيكى">عداد ميكانيكي</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="meterBrand" class="required">ماركة العداد</label>
-                <select id="meterBrand" required>
-                    <option value="">اختر الماركة</option>
-                    <option value="هيدروس">هيدروس</option>
-                    <option value="سنسوس">سنسوس</option>
-                    <option value="انتجرا">انتجرا</option>
-                    <option value="wadad">Wadad</option>
-                </select>
-            </div>
-        </div>
+<h2>تسجيل بيانات العداد</h2>
 
-        <!-- بيانات المحبس والصندوق -->
-        <div class="form-section">
-            <h2>🔩 المحبس والصندوق</h2>
-            
-            <div class="form-group">
-                <label for="valveType" class="required">نوع المحبس</label>
-                <select id="valveType" required>
-                    <option value="">اختر النوع</option>
-                    <option value="بوقاتى">بوقاتي</option>
-                    <option value="عادى">عادي</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="valveCondition" class="required">حالة المحبس</label>
-                <select id="valveCondition" required>
-                    <option value="">اختر الحالة</option>
-                    <option value="سليم">سليم</option>
-                    <option value="يحتاج تغيير">يحتاج تغيير</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="boxCondition" class="required">حالة الصندوق</label>
-                <select id="boxCondition" required>
-                    <option value="">اختر الحالة</option>
-                    <option value="سليم">سليم</option>
-                    <option value="يحتاج تغيير">يحتاج تغيير</option>
-                </select>
-            </div>
-        </div>
+<input type="text" id="counterNumber" placeholder="أدخل رقم العداد" required>
+<button onclick="scanBarcode()">مسح الباركود</button>
+<button onclick="submitData()">إدخال البيانات</button>
+<div id="result"></div>
 
-        <!-- بيانات العقار -->
-        <div class="form-section">
-            <h2>🏠 البيانات العقارية</h2>
-            
-            <div class="form-group">
-                <label for="pieceNumber" class="required">رقم القطعة</label>
-                <input type="text" id="pieceNumber" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="propertyType" class="required">نوع العقار</label>
-                <select id="propertyType" required>
-                    <option value="">اختر النوع</option>
-                    <option value="سكنى">سكني</option>
-                    <option value="تجارى">تجاري</option>
-                    <option value="حكومى">حكومي</option>
-                    <option value="VIP">VIP</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="propertyCondition" class="required">حالة العقار</label>
-                <select id="propertyCondition" required>
-                    <option value="">اختر الحالة</option>
-                    <option value="عقار قائم">عقار قائم</option>
-                    <option value="ارض فضاء">أرض فضاء</option>
-                    <option value="عقار مهدوم">عقار مهدوم</option>
-                    <option value="عقار تحت الانشاء">عقار تحت الإنشاء</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="hasViolation" class="required">يوجد تعدي</label>
-                <select id="hasViolation" required>
-                    <option value="">اختر</option>
-                    <option value="لا">لا</option>
-                    <option value="نعم">نعم</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="districtName" class="required">اسم الحي</label>
-                <input type="text" id="districtName" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="electricityMetersCount" class="required">عدد عدادات الكهرباء</label>
-                <input type="number" id="electricityMetersCount" min="1" value="1" required>
-            </div>
-        </div>
+<div id="scanner" style="display:none;">
+  <video id="video" autoplay playsinline></video>
+</div>
 
-        <!-- الموقع الجغرافي -->
-        <div class="form-section">
-            <h2>📍 الموقع الجغرافي</h2>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group">
-                    <label for="latitude" class="required">خط العرض</label>
-                    <input type="text" id="latitude" required readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label for="longitude" class="required">خط الطول</label>
-                    <input type="text" id="longitude" required readonly>
-                </div>
-            </div>
-            
-            <button class="btn btn-info" onclick="getCurrentLocation()">
-                📍 الحصول على الموقع
-            </button>
-        </div>
+<script>
+  let scanning = false;
 
-        <!-- نظام الصور -->
-        <div class="form-section">
-            <h2>📷 نظام الصور</h2>
-            
-            <div class="form-group">
-                <label for="photoType">نوع الصورة</label>
-                <select id="photoType">
-                    <option value="">اختر نوع الصورة</option>
-                    <option value="meterImage">صورة العداد</option>
-                    <option value="pieceNumberImage">صورة رقم القطعة</option>
-                    <option value="propertyImage">صورة العقار</option>
-                    <option value="valveImage">صورة المحبس</option>
-                    <option value="boxImage">صورة الصندوق</option>
-                    <option value="violationImage">صورة التعدي</option>
-                </select>
-            </div>
-            
-            <div style="text-align: center;">
-                <button class="btn btn-info" onclick="startCamera()" id="startCameraBtn">
-                    📸 فتح الكاميرا
-                </button>
-                <button class="btn btn-success" onclick="capturePhoto()" id="captureBtn" style="display: none;">
-                    ✅ التقاط
-                </button>
-            </div>
-            
-            <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
-            <canvas id="cameraCanvas" style="display: none;"></canvas>
-            
-            <div id="capturedImages" class="image-grid">
-                <!-- الصور الملتقطة تظهر هنا -->
-            </div>
-        </div>
+  function scanBarcode() {
+    if (scanning) return;
+    scanning = true;
+    document.getElementById('scanner').style.display = 'block';
 
-        <!-- بيانات الفني -->
-        <div class="form-section">
-            <h2>👤 بيانات الفني</h2>
-            
-            <div class="form-group">
-                <label for="technicianName" class="required">اسم الفني</label>
-                <input type="text" id="technicianName" required>
-            </div>
-        </div>
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector('#video'),
+        constraints: {
+          facingMode: "environment"
+        },
+      },
+      decoder: {
+        readers: ["code_128_reader"]
+      },
+    }, function(err) {
+      if (err) {
+        console.error(err);
+        alert("خطأ في تهيئة الكاميرا");
+        scanning = false;
+        return;
+      }
+      Quagga.start();
+    });
 
-        <!-- الإرسال -->
-        <div class="form-section">
-            <h2>✅ الإرسال والحفظ</h2>
-            
-            <div class="progress-bar">
-                <div class="progress" id="submitProgress"></div>
-            </div>
-            
-            <div class="loading" id="submitLoading">
-                <div class="spinner"></div>
-                <div>جاري حفظ البيانات...</div>
-            </div>
-            
-            <div id="submitMessage"></div>
-            
-            <button class="btn btn-success" onclick="submitAllData()" style="width: 100%;">
-                💾 حفظ في جوجل شيت
-            </button>
-            
-            <button class="btn btn-info" onclick="testConnection()" style="width: 100%; margin-top: 10px;">
-                🔗 اختبار الاتصال
-            </button>
-        </div>
+    Quagga.onDetected(function(result) {
+      const code = result.codeResult.code;
+      document.getElementById('counterNumber').value = code;
+      Quagga.stop();
+      document.getElementById('scanner').style.display = 'none';
+      scanning = false;
+      document.getElementById('result').innerText = "تم مسح الباركود: " + code;
+    });
+  }
 
-        <!-- التصحيح -->
-        <div id="debug"></div>
-    </div>
+  function submitData() {
+    const counterNumber = document.getElementById('counterNumber').value.trim();
+    if (!counterNumber) {
+      alert("يرجى إدخال رقم العداد");
+      return;
+    }
 
-    <!-- ماسح الباركود -->
-    <div id="barcode-scanner">
-        <video id="barcode-video"></video>
-        <div class="scanner-controls">
-            <button class="btn btn-danger" onclick="stopBarcodeScanner()">
-                ❌ إغلاق الماسح
-            </button>
-        </div>
-    </div>
+    // هنا يمكنك إضافة حقول أخرى حسب الحاجة
+    const data = {
+      counter_number: counterNumber,
+      counter_type: "نوع العداد", // يمكنك إضافة حقول اختيارية
+      brand: "ماركة العداد",
+      sensor_type: "نوع المجس",
+      sensor_status: "حالة المجس",
+      box_status: "حالة الصندوق",
+      part_number: "رقم القطعة",
+      property_type: "نوع العقار",
+      property_status: "حالة العقار",
+      has_violation: "false",
+      district: "اسم الحي",
+      nearby_meters: "0",
+      latitude: "0",
+      longitude: "0",
+      image_counter: "https://example.com/image1.jpg", // رابط الصورة
+      image_part: "https://example.com/image2.jpg",
+      image_property: "https://example.com/image3.jpg",
+      image_box: "https://example.com/image4.jpg",
+      image_violation: "https://example.com/image5.jpg",
+      technician_name: "اسم الفني"
+    };
 
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwarqbip2swsjayU-AU6mJ2k4uI8SCzlphSB61s82z6t8n2yxjTYGjY6cdguNEjf6pc5w/exec';
-        
-        let currentStream = null;
-        let capturedImages = {};
-        let barcodeScannerActive = false;
+    fetch("https://script.google.com/macros/s/AKfycbxcCArgLSfQ5qGTryNRaHxM4YJL6J-lEk9IF8owOex4Tr3VA60usd276ellJ0akw_FkIA/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(data)
+    })
+    .then(res => res.json())
+    .then(json => {
+      if (json.success) {
+        document.getElementById('result').innerText = "✅ تم إرسال البيانات بنجاح!";
+        document.getElementById('counterNumber').value = "";
+      } else {
+        document.getElementById('result').innerText = "❌ خطأ: " + json.message;
+      }
+    })
+    .catch(err => {
+      document.getElementById('result').innerText = "❌ خطأ في الإرسال";
+      console.error(err);
+    });
+  }
+</script>
 
-        // نظام الباركود
-        function startBarcodeScanner() {
-            const scanner = document.getElementById('barcode-scanner');
-            scanner.style.display = 'block';
-            
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' } 
-            }).then(function(stream) {
-                const video = document.getElementById('barcode-video');
-                video.srcObject = stream;
-                video.play();
-                
-                // تهيئة QuaggaJS
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: video,
-                        constraints: {
-                            facingMode: "environment"
-                        }
-                    },
-                    decoder: {
-                        readers: ["code_128_reader", "ean_reader", "code_39_reader"]
-                    }
-                }, function(err) {
-                    if (err) {
-                        console.error('خطأ في تهيئة الماسح:', err);
-                        return;
-                    }
-                    Quagga.start();
-                    barcodeScannerActive = true;
-                });
-
-                Quagga.onDetected(function(result) {
-                    const code = result.codeResult.code;
-                    document.getElementById('meterNumber').value = code;
-                    showMessage('تم مسح الباركود: ' + code, 'success');
-                    stopBarcodeScanner();
-                });
-
-            }).catch(function(error) {
-                console.error('خطأ في الكاميرا:', error);
-                showMessage('خطأ في فتح الكاميرا', 'error');
-            });
-        }
-
-        function stopBarcodeScanner() {
-            if (barcodeScannerActive) {
-                Quagga.stop();
-                barcodeScannerActive = false;
-            }
-            
-            const scanner = document.getElementById('barcode-scanner');
-            scanner.style.display = 'none';
-            
-            const video = document.getElementById('barcode-video');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-            }
-        }
-
-        // نظام الكاميرا والصور
-        async function startCamera() {
-            const photoType = document.getElementById('photoType').value;
-            if (!photoType) {
-                showMessage('يرجى اختيار نوع الصورة أولاً', 'error');
-                return;
-            }
-            
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
-                
-                currentStream = stream;
-                const preview = document.getElementById('cameraPreview');
-                preview.srcObject = stream;
-                preview.style.display = 'block';
-                
-                document.getElementById('startCameraBtn').style.display = 'none';
-                document.getElementById('captureBtn').style.display = 'inline-block';
-                
-            } catch (error) {
-                showMessage('خطأ في فتح الكاميرا', 'error');
-            }
-        }
-
-        function capturePhoto() {
-            const photoType = document.getElementById('photoType').value;
-            const preview = document.getElementById('cameraPreview');
-            const canvas = document.getElementById('cameraCanvas');
-            const context = canvas.getContext('2d');
-            
-            canvas.width = preview.videoWidth;
-            canvas.height = preview.videoHeight;
-            context.drawImage(preview, 0, 0);
-            
-            const imageData = canvas.toDataURL('image/jpeg', 0.8);
-            capturedImages[photoType] = imageData;
-            
-            displayCapturedImage(photoType, imageData);
-            stopCamera();
-            showMessage('تم التقاط الصورة بنجاح', 'success');
-        }
-
-        function stopCamera() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('cameraPreview').style.display = 'none';
-            document.getElementById('startCameraBtn').style.display = 'inline-block';
-            document.getElementById('captureBtn').style.display = 'none';
-        }
-
-        function displayCapturedImage(type, imageData) {
-            const container = document.getElementById('capturedImages');
-            
-            const imageItem = document.createElement('div');
-            imageItem.className = 'image-item';
-            imageItem.innerHTML = `
-                <img src="${imageData}" class="captured-image" alt="${type}">
-                <button class="remove-image" onclick="removeImage('${type}')">×</button>
-                <div style="font-size: 12px; margin-top: 5px;">${getImageName(type)}</div>
-            `;
-            
-            container.appendChild(imageItem);
-        }
-
-        function getImageName(type) {
-            const names = {
-                'meterImage': 'العداد',
-                'pieceNumberImage': 'رقم القطعة',
-                'propertyImage': 'العقار',
-                'valveImage': 'المحبس',
-                'boxImage': 'الصندوق',
-                'violationImage': 'التعدي'
-            };
-            return names[type] || type;
-        }
-
-        function removeImage(type) {
-            delete capturedImages[type];
-            updateCapturedImagesDisplay();
-        }
-
-        function updateCapturedImagesDisplay() {
-            const container = document.getElementById('capturedImages');
-            container.innerHTML = '';
-            
-            Object.keys(capturedImages).forEach(type => {
-                displayCapturedImage(type, capturedImages[type]);
-            });
-        }
-
-        // الموقع الجغرافي
-        function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                showMessage('المتصفح لا يدعم تحديد الموقع', 'error');
-                return;
-            }
-            
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lng = position.coords.longitude.toFixed(6);
-                    
-                    document.getElementById('latitude').value = lat;
-                    document.getElementById('longitude').value = lng;
-                    
-                    showMessage('تم تحديد الموقع: ' + lat + ', ' + lng, 'success');
-                },
-                function(error) {
-                    showMessage('فشل في تحديد الموقع', 'error');
-                }
-            );
-        }
-
-        // إرسال البيانات
-        async function submitAllData() {
-            const loading = document.getElementById('submitLoading');
-            const progress = document.getElementById('submitProgress');
-            const message = document.getElementById('submitMessage');
-            
-            // التحقق من البيانات
-            const requiredFields = ['meterNumber', 'meterType', 'technicianName'];
-            for (const field of requiredFields) {
-                if (!document.getElementById(field).value) {
-                    showMessage('يرجى ملء جميع الحقول المطلوبة', 'error', message);
-                    return;
-                }
-            }
-            
-            loading.style.display = 'block';
-            progress.style.width = '30%';
-            
-            try {
-                const formData = {
-                    meterNumber: document.getElementById('meterNumber').value,
-                    meterType: document.getElementById('meterType').value,
-                    meterBrand: document.getElementById('meterBrand').value,
-                    valveType: document.getElementById('valveType').value,
-                    valveCondition: document.getElementById('valveCondition').value,
-                    boxCondition: document.getElementById('boxCondition').value,
-                    pieceNumber: document.getElementById('pieceNumber').value,
-                    propertyType: document.getElementById('propertyType').value,
-                    propertyCondition: document.getElementById('propertyCondition').value,
-                    hasViolation: document.getElementById('hasViolation').value,
-                    districtName: document.getElementById('districtName').value,
-                    electricityMetersCount: document.getElementById('electricityMetersCount').value,
-                    latitude: document.getElementById('latitude').value,
-                    longitude: document.getElementById('longitude').value,
-                    technicianName: document.getElementById('technicianName').value,
-                    ...capturedImages
-                };
-                
-                progress.style.width = '60%';
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                progress.style.width = '90%';
-                
-                const result = await response.json();
-                progress.style.width = '100%';
-                
-                if (result.success) {
-                    showMessage('✅ ' + result.message + ' - تم رفع ' + (result.imageUrls ? Object.keys(result.imageUrls).length : 0) + ' صورة', 'success', message);
-                    
-                    // إعادة تعيين النموذج
-                    setTimeout(() => {
-                        resetForm();
-                    }, 2000);
-                } else {
-                    showMessage('❌ ' + result.error, 'error', message);
-                }
-                
-            } catch (error) {
-                showMessage('❌ فشل في الإرسال: ' + error.message, 'error', message);
-            } finally {
-                loading.style.display = 'none';
-                setTimeout(() => {
-                    progress.style.width = '0%';
-                }, 1000);
-            }
-        }
-
-        // دوال مساعدة
-        function debugLog(msg) {
-            const debug = document.getElementById('debug');
-            debug.textContent += new Date().toLocaleTimeString() + ': ' + msg + '\n';
-            debug.scrollTop = debug.scrollHeight;
-        }
-
-        function showMessage(msg, type, container = null) {
-            const target = container || document.getElementById('submitMessage');
-            target.innerHTML = `<div class="message ${type}">${msg}</div>`;
-        }
-
-        function resetForm() {
-            document.querySelectorAll('input, select').forEach(input => {
-                if (input.type !== 'button') {
-                    input.value = '';
-                }
-            });
-            document.getElementById('electricityMetersCount').value = '1';
-            capturedImages = {};
-            updateCapturedImagesDisplay();
-        }
-
-        async function testConnection() {
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const result = await response.json();
-                showMessage('✅ ' + result.message, 'success');
-            } catch (error) {
-                showMessage('❌ فشل الاتصال: ' + error.message, 'error');
-            }
-        }
-
-        // التهيئة
-        window.onload = function() {
-            debugLog('🚀 النظام جاهز للاستخدام');
-        };
-    </script>
 </body>
 </html>
-
-
