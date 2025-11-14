@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة العدادات</title>
+    <title>نظام قراءة العدادات</title>
+    <!-- استبدال Quagga بـ Html5Qrcode -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
     <style>
         * {
@@ -20,7 +22,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 500px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -70,22 +72,6 @@
             display: block;
         }
         
-        .form-section {
-            margin-bottom: 25px;
-            padding: 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            background: #f8f9fa;
-        }
-        
-        .form-section h3 {
-            margin-bottom: 20px;
-            color: #495057;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-            font-size: 20px;
-        }
-        
         .form-group {
             margin-bottom: 20px;
         }
@@ -95,41 +81,37 @@
             margin-bottom: 8px;
             color: #333;
             font-weight: bold;
-            font-size: 16px;
         }
         
-        input, select, textarea {
+        input, textarea {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s;
-            background: white;
+            transition: border-color 0.3s;
         }
         
-        input:focus, select:focus, textarea:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         button {
-            padding: 15px 25px;
+            width: 100%;
+            padding: 15px;
             background: #667eea;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin: 5px;
-            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 10px;
         }
         
         button:hover {
             background: #5a6fd8;
-            transform: translateY(-2px);
         }
         
         button.secondary {
@@ -140,44 +122,6 @@
             background: #5a6268;
         }
         
-        button.success {
-            background: #28a745;
-        }
-        
-        button.success:hover {
-            background: #218838;
-        }
-        
-        button.danger {
-            background: #dc3545;
-        }
-        
-        button.danger:hover {
-            background: #c82333;
-        }
-        
-        .photo-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .photo-button {
-            padding: 12px;
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .photo-button:hover {
-            background: #138496;
-        }
-        
         #reader {
             width: 100%;
             height: 300px;
@@ -186,343 +130,100 @@
             overflow: hidden;
             margin-bottom: 20px;
             position: relative;
-            border: 3px solid #667eea;
         }
         
         .result {
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            font-size: 16px;
         }
         
         .success {
             background: #d4edda;
             color: #155724;
-            border: 2px solid #c3e6cb;
+            border: 1px solid #c3e6cb;
         }
         
         .error {
             background: #f8d7da;
             color: #721c24;
-            border: 2px solid #f5c6cb;
+            border: 1px solid #f5c6cb;
         }
         
         .barcode-result {
             background: #e9ecef;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
             text-align: center;
             font-size: 18px;
             font-weight: bold;
-            border: 2px solid #667eea;
         }
 
         #camera-status {
             text-align: center;
-            padding: 15px;
+            padding: 10px;
             background: #fff3cd;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 16px;
-            border: 2px solid #ffeaa7;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .image-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            border-radius: 5px;
             margin: 10px 0;
-        }
-        
-        .image-preview {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border: 3px solid #ddd;
-            border-radius: 8px;
-            padding: 5px;
-            background: white;
-        }
-        
-        .coordinates-display {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 14px;
-            border: 2px solid #667eea;
-        }
-        
-        .required::after {
-            content: " *";
-            color: #dc3545;
-        }
-        
-        .location-buttons {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                margin: 10px;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .photo-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            button {
-                width: 100%;
-                margin: 5px 0;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 نظام إدارة العدادات</h1>
-            <p>نظام متكامل لتسجيل بيانات العدادات والمسح الضوئي</p>
+            <h1>📊 نظام قراءة العدادات</h1>
+            <p>مسح الباركود أو الإدخال اليدوي</p>
         </div>
         
         <div class="tab-buttons">
-            <button class="tab-button active" onclick="switchTab('main')">📝 البيانات الرئيسية</button>
-            <button class="tab-button" onclick="switchTab('camera')">📷 مسح الباركود</button>
+            <button class="tab-button active" onclick="switchTab('camera')">📷 مسح الباركود</button>
+            <button class="tab-button" onclick="switchTab('manual')">⌨️ إدخال يدوي</button>
         </div>
         
-        <!-- تبويب البيانات الرئيسية -->
-        <div id="main-tab" class="tab-content active">
-            <form id="main-form">
-                <!-- قسم بيانات العداد -->
-                <div class="form-section">
-                    <h3>📟 بيانات العداد</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="meterNumber" class="required">رقم العداد</label>
-                            <input type="text" id="meterNumber" required placeholder="أدخل رقم العداد أو استخدم المسح الضوئي">
-                            <div id="barcode-result" class="barcode-result" style="display: none;">
-                                تم قراءة الباركود: <span id="barcode-value"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="meterType" class="required">نوع العداد</label>
-                            <select id="meterType" required>
-                                <option value="">اختر نوع العداد</option>
-                                <option value="ذكى">ذكى</option>
-                                <option value="ميكانيكى">ميكانيكى</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="meterBrand" class="required">ماركة العداد</label>
-                            <select id="meterBrand" required>
-                                <option value="">اختر الماركة</option>
-                                <option value="هيدروس">هيدروس</option>
-                                <option value="سنسوس">سنسوس</option>
-                                <option value="انتجرا">انتجرا</option>
-                                <option value="wadad">wadad</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- قسم بيانات المحبس والصندوق -->
-                <div class="form-section">
-                    <h3>🔧 بيانات المحبس والصندوق</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="valveType" class="required">نوع المحبس</label>
-                            <select id="valveType" required>
-                                <option value="">اختر نوع المحبس</option>
-                                <option value="بوقاتى">بوقاتى</option>
-                                <option value="عادى">عادى</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valveCondition" class="required">حالة المحبس</label>
-                            <select id="valveCondition" required>
-                                <option value="">اختر الحالة</option>
-                                <option value="يحتاج تغيير">يحتاج تغيير</option>
-                                <option value="سليم">سليم</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="boxCondition" class="required">حالة الصندوق</label>
-                            <select id="boxCondition" required>
-                                <option value="">اختر الحالة</option>
-                                <option value="يحتاج تغيير">يحتاج تغيير</option>
-                                <option value="سليم">سليم</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- قسم بيانات العقار -->
-                <div class="form-section">
-                    <h3>🏠 بيانات العقار</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="pieceNumber" class="required">رقم القطعة</label>
-                            <input type="text" id="pieceNumber" required placeholder="أدخل رقم القطعة">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="propertyType" class="required">نوع العقار</label>
-                            <select id="propertyType" required>
-                                <option value="">اختر نوع العقار</option>
-                                <option value="سكنى">سكنى</option>
-                                <option value="تجارى">تجارى</option>
-                                <option value="حكومى">حكومى</option>
-                                <option value="VIP">VIP</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="propertyCondition" class="required">حالة العقار</label>
-                            <select id="propertyCondition" required>
-                                <option value="">اختر الحالة</option>
-                                <option value="عقار قائم">عقار قائم</option>
-                                <option value="ارض فضاء">ارض فضاء</option>
-                                <option value="عقار مهدوم">عقار مهدوم</option>
-                                <option value="عقار تحت الانشاء">عقار تحت الانشاء</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="hasEncroachment" class="required">يوجد تعدي</label>
-                            <select id="hasEncroachment" required>
-                                <option value="">اختر</option>
-                                <option value="نعم">نعم</option>
-                                <option value="لا">لا</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="districtName" class="required">اسم الحى</label>
-                            <input type="text" id="districtName" required placeholder="أدخل اسم الحى">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="electricMetersCount" class="required">عدد عدادات الكهرباء</label>
-                            <input type="number" id="electricMetersCount" required min="0" value="0" placeholder="أدخل العدد">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- قسم الموقع والإحداثيات -->
-                <div class="form-section">
-                    <h3>📍 الموقع والإحداثيات</h3>
-                    <div class="form-group">
-                        <label>الحصول على الموقع</label>
-                        <div class="location-buttons">
-                            <button type="button" onclick="getCurrentLocation()" class="success">📍 الحصول على الموقع الحالي</button>
-                            <button type="button" onclick="clearLocation()" class="secondary">🗑️ مسح الإحداثيات</button>
-                        </div>
-                        <div id="location-status" class="coordinates-display">
-                            لم يتم الحصول على الموقع بعد
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="latitude" class="required">خط العرض (Latitude)</label>
-                            <input type="text" id="latitude" required readonly placeholder="سيتم ملؤه تلقائياً">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="longitude" class="required">خط الطول (Longitude)</label>
-                            <input type="text" id="longitude" required readonly placeholder="سيتم ملؤه تلقائياً">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- قسم الصور -->
-                <div class="form-section">
-                    <h3>📷 الصور المرفوعة</h3>
-                    <div class="photo-buttons">
-                        <button type="button" class="photo-button" onclick="takePhoto('meterImage')">📸 صورة العداد</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('pieceNumberImage')">📸 صورة رقم القطعة</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('propertyImage')">📸 صورة العقار</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('electricMetersImage')">📸 صورة عدادات الكهرباء</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('valveImage')">📸 صورة المحبس</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('boxImage')">📸 صورة الصندوق</button>
-                        <button type="button" class="photo-button" onclick="takePhoto('encroachmentImage')">📸 صورة التعدي</button>
-                    </div>
-                    
-                    <div class="image-preview-container" id="image-previews">
-                        <!-- ستظهر معاينات الصور هنا -->
-                    </div>
-                </div>
-
-                <!-- قسم البيانات الإضافية -->
-                <div class="form-section">
-                    <h3>👤 بيانات إضافية</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="technicianName" class="required">اسم الفنى</label>
-                            <input type="text" id="technicianName" required placeholder="أدخل اسم الفنى">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="notes">ملاحظات إضافية</label>
-                        <textarea id="notes" rows="4" placeholder="أضف أي ملاحظات إضافية هنا..."></textarea>
-                    </div>
-                </div>
-
-                <!-- أزرار التنفيذ -->
-                <div class="form-section" style="text-align: center; background: #e7f3ff;">
-                    <button type="button" onclick="submitAllData()" class="success" style="padding: 20px 40px; font-size: 18px;">
-                        💾 حفظ جميع البيانات
-                    </button>
-                    <button type="button" onclick="clearAllData()" class="danger" style="padding: 20px 40px; font-size: 18px;">
-                        🗑️ مسح الكل
-                    </button>
-                </div>
-            </form>
-        </div>
-
         <!-- تبويب مسح الباركود -->
-        <div id="camera-tab" class="tab-content">
-            <div class="form-section">
-                <h3>📷 مسح الباركود</h3>
-                <div id="camera-status">
-                    انقر على "بدء المسح" ثم وجّه الكاميرا نحو الباركود
-                </div>
-                
-                <div id="reader"></div>
-                
-                <div style="text-align: center;">
-                    <button onclick="startBarcodeScanner()">🔍 بدء المسح</button>
-                    <button onclick="stopBarcodeScanner()" class="secondary">⏹️ إيقاف المسح</button>
-                    <button onclick="switchTab('main')" class="success">📋 العودة للبيانات</button>
-                </div>
+        <div id="camera-tab" class="tab-content active">
+            <div id="camera-status">
+                انقر على "بدء المسح" ثم وجّه الكاميرا نحو الباركود
             </div>
+            
+            <div id="reader"></div>
+            
+            <button onclick="startBarcodeScanner()">بدء المسح</button>
+            <button onclick="stopBarcodeScanner()" class="secondary">إيقاف المسح</button>
+            
+            <div id="barcode-result" class="barcode-result" style="display: none;">
+                تم قراءة الباركود: <span id="barcode-value"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="camera-meter-number">رقم العداد:</label>
+                <input type="text" id="camera-meter-number" placeholder="سيتم ملؤه تلقائياً من الباركود">
+            </div>
+            
+            <div class="form-group">
+                <label for="camera-notes">ملاحظات:</label>
+                <textarea id="camera-notes" rows="3" placeholder="أضف أي ملاحظات هنا..."></textarea>
+            </div>
+            
+            <button onclick="submitData('camera')">حفظ البيانات</button>
+        </div>
+        
+        <!-- تبويب الإدخال اليدوي -->
+        <div id="manual-tab" class="tab-content">
+            <div class="form-group">
+                <label for="manual-meter-number">رقم العداد:</label>
+                <input type="text" id="manual-meter-number" placeholder="أدخل رقم العداد يدوياً">
+            </div>
+            
+            <div class="form-group">
+                <label for="manual-notes">ملاحظات:</label>
+                <textarea id="manual-notes" rows="3" placeholder="أضف أي ملاحظات هنا..."></textarea>
+            </div>
+            
+            <button onclick="submitData('manual')">حفظ البيانات</button>
         </div>
         
         <div id="result-message"></div>
