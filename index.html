@@ -1,219 +1,231 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل عداد</title>
-  <!-- ZXing.js -->
-  <script src="https://unpkg.com/@zxing/library@0.18.3/dist/umd/minified/zxing-library.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
-      background: #f5f5f5;
-      direction: rtl;
-      margin: 0;
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-    }
-
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    button {
-      background: #3498db;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #2980b9;
-    }
-
-    #result {
-      margin-top: 15px;
-      padding: 10px;
-      background: #eaf7ea;
-      border: 1px solid #d4edda;
-      border-radius: 5px;
-      display: none;
-    }
-
-    #scanner {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    #video {
-      width: 100%;
-      max-width: 400px;
-      border: 2px solid #3498db;
-      border-radius: 8px;
-      background: black;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-group button {
-      flex: 1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام قراءة العدادات</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            background: #f1f1f1;
+            border-radius: 10px;
+            padding: 5px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        #camera-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #00ff00;
+            pointer-events: none;
+        }
+        
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .barcode-result {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 نظام قراءة العدادات</h1>
+            <p>مسح الباركود أو الإدخال اليدوي</p>
+        </div>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="switchTab('camera')">📷 مسح الباركود</button>
+            <button class="tab-button" onclick="switchTab('manual')">⌨️ إدخال يدوي</button>
+        </div>
+        
+        <!-- تبويب مسح الباركود -->
+        <div id="camera-tab" class="tab-content active">
+            <div id="camera-container">
+                <video id="video" playsinline></video>
+                <div id="camera-overlay"></div>
+            </div>
+            
+            <button onclick="startCamera()">تشغيل الكاميرا</button>
+            <button onclick="stopCamera()" style="background: #dc3545; margin-top: 10px;">إيقاف الكاميرا</button>
+            
+            <div id="barcode-result" class="barcode-result" style="display: none;">
+                تم قراءة الباركود: <span id="barcode-value"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="camera-meter-number">رقم العداد:</label>
+                <input type="text" id="camera-meter-number" placeholder="سيتم ملؤه تلقائياً من الباركود">
+            </div>
+            
+            <div class="form-group">
+                <label for="camera-notes">ملاحظات:</label>
+                <textarea id="camera-notes" rows="3" placeholder="أضف أي ملاحظات هنا..."></textarea>
+            </div>
+            
+            <button onclick="submitData('camera')">حفظ البيانات</button>
+        </div>
+        
+        <!-- تبويب الإدخال اليدوي -->
+        <div id="manual-tab" class="tab-content">
+            <div class="form-group">
+                <label for="manual-meter-number">رقم العداد:</label>
+                <input type="text" id="manual-meter-number" placeholder="أدخل رقم العداد يدوياً">
+            </div>
+            
+            <div class="form-group">
+                <label for="manual-notes">ملاحظات:</label>
+                <textarea id="manual-notes" rows="3" placeholder="أضف أي ملاحظات هنا..."></textarea>
+            </div>
+            
+            <button onclick="submitData('manual')">حفظ البيانات</button>
+        </div>
+        
+        <div id="result-message"></div>
+    </div>
 
-<div class="container">
-
-  <h2>تسجيل بيانات العداد</h2>
-
-  <input type="text" id="counterNumber" placeholder="أدخل رقم العداد" required>
-
-  <div class="btn-group">
-    <button onclick="scanBarcode()">مسح الباركود</button>
-    <button onclick="submitData()">إدخال البيانات</button>
-  </div>
-
-  <div id="result"></div>
-
-  <div id="scanner">
-    <video id="video" autoplay playsinline></video>
-    <button onclick="stopScanner()">إيقاف المسح</button>
-  </div>
-
-</div>
-
-<script>
-  let codeReader = null;
-  let isScanning = false;
-
-  function showResult(message, isError = false) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.innerText = message;
-    resultDiv.style.color = isError ? '#dc3545' : '#28a745';
-    resultDiv.style.display = 'block';
-    setTimeout(() => {
-      resultDiv.style.display = 'none';
-    }, 5000);
-  }
-
-  function scanBarcode() {
-    if (isScanning) return;
-
-    const videoElement = document.getElementById('video');
-    const scannerDiv = document.getElementById('scanner');
-
-    scannerDiv.style.display = 'block';
-
-    try {
-      codeReader = new ZXing.BrowserMultiFormatReader();
-
-      codeReader.decodeFromVideoDevice(undefined, 'video', (result, err) => {
-        if (result) {
-          document.getElementById('counterNumber').value = result.text;
-          showResult(`تم مسح الباركود: ${result.text}`);
-          stopScanner();
-        } else if (err && !(err instanceof ZXing.NotFoundException)) {
-          console.error(err);
-          showResult("خطأ في مسح الباركود", true);
-          stopScanner();
-        }
-      });
-
-      isScanning = true;
-
-    } catch (error) {
-      console.error("خطأ في تهيئة الماسح:", error);
-      showResult("لا يمكن فتح الكاميرا. تأكد من السماح بالوصول إليها.", true);
-      scannerDiv.style.display = 'none';
-    }
-  }
-
-  function stopScanner() {
-    if (codeReader && isScanning) {
-      codeReader.reset();
-      isScanning = false;
-      document.getElementById('scanner').style.display = 'none';
-    }
-  }
-
-  function submitData() {
-    const counterNumber = document.getElementById('counterNumber').value.trim();
-    if (!counterNumber) {
-      showResult("يرجى إدخال رقم العداد", true);
-      return;
-    }
-
-    // البيانات المرسلة إلى Google Sheets
-    const data = {
-      counter_number: counterNumber,
-      counter_type: "نوع العداد",
-      brand: "ماركة العداد",
-      sensor_type: "نوع المجس",
-      sensor_status: "حالة المجس",
-      box_status: "حالة الصندوق",
-      part_number: "رقم القطعة",
-      property_type: "نوع العقار",
-      property_status: "حالة العقار",
-      has_violation: "false",
-      district: "اسم الحي",
-      nearby_meters: "0",
-      latitude: "0",
-      longitude: "0",
-      image_counter: "https://example.com/image1.jpg",
-      image_part: "https://example.com/image2.jpg",
-      image_property: "https://example.com/image3.jpg",
-      image_box: "https://example.com/image4.jpg",
-      image_violation: "https://example.com/image5.jpg",
-      technician_name: "اسم الفني"
-    };
-
-    // ⚠️ استبدل هذا الرابط برابط Web App الخاص بك
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbxcCArgLSfQ5qGTryNRaHxM4YJL6J-lEk9IF8owOex4Tr3VA60usd276ellJ0akw_FkIA/exec";
-
-    fetch(webAppUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(data)
-    })
-    .then(res => res.json())
-    .then(json => {
-      if (json.success) {
-        showResult("✅ تم إرسال البيانات بنجاح!");
-        document.getElementById('counterNumber').value = "";
-      } else {
-        showResult("❌ خطأ: " + (json.message || "غير معروف"), true);
-      }
-    })
-    .catch(err => {
-      console.error("خطأ في الإرسال:", err);
-      showResult("❌ خطأ في الإرسال. تحقق من اتصالك بالإنترنت.", true);
-    });
-  }
-</script>
-
+    <!-- مكتبة QuaggaJS لمسح الباركود -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
