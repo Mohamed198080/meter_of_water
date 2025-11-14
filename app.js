@@ -1,181 +1,291 @@
-// تطبيق JavaScript الرئيسي - مع تصحيح الأخطاء
-let html5QrcodeScanner = null;
-let isScanning = false;
+// تطبيق نظام إدارة العدادات - JavaScript
+let currentLocation = null;
+let locationWatchId = null;
 
-// تبديل التبويبات
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('active');
-    });
-    
-    document.getElementById(tabName + '-tab').classList.add('active');
-    event.target.classList.add('active');
-    
-    if (isScanning) {
-        stopBarcodeScanner();
-    }
-}
-
-// بدء مسح الباركود مع تصحيح الأخطاء
-async function startBarcodeScanner() {
-    try {
-        if (isScanning) {
-            showResult('الماسح يعمل بالفعل!', 'error');
-            return;
-        }
-
-        document.getElementById('camera-status').textContent = 'جاري تهيئة الكاميرا...';
-        document.getElementById('camera-status').style.background = '#fff3cd';
-        
-        // تحميل المكتبة ديناميكياً إذا لم تكن موجودة
-        if (typeof Html5Qrcode === 'undefined') {
-            await loadHtml5QrcodeLibrary();
-        }
-
-        // إنشاء ماسح جديد
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 150 },
-            rememberLastUsedCamera: true
-        };
-
-        console.log('جاري تشغيل الكاميرا...');
-        
-        // بدء المسح
-        await html5QrcodeScanner.start(
-            { facingMode: "environment" }, 
-            config,
-            onScanSuccess,
-            onScanFailure
-        ).then(() => {
-            isScanning = true;
-            document.getElementById('camera-status').textContent = 'الماسح نشط - وجّه الكاميرا نحو الباركود';
-            document.getElementById('camera-status').style.background = '#d4edda';
-            console.log('تم تشغيل الكاميرا بنجاح');
-        });
-        
-    } catch (error) {
-        console.error('خطأ في تشغيل الماسح:', error);
-        let errorMessage = 'خطأ في تشغيل الكاميرا: ';
-        
-        if (error.message.includes('NotAllowedError')) {
-            errorMessage += 'تم رفض الإذن. يرجى السماح باستخدام الكاميرا';
-        } else if (error.message.includes('NotFoundError')) {
-            errorMessage += 'لم يتم العثور على كاميرا خلفية';
-        } else if (error.message.includes('NotSupportedError')) {
-            errorMessage += 'المتصفح لا يدعم الكاميرا';
-        } else {
-            errorMessage += error.message;
-        }
-        
-        document.getElementById('camera-status').textContent = errorMessage;
-        document.getElementById('camera-status').style.background = '#f8d7da';
-        showResult(errorMessage, 'error');
-    }
-}
-
-// تحميل المكتبة ديناميكياً
-function loadHtml5QrcodeLibrary() {
-    return new Promise((resolve, reject) => {
-        if (typeof Html5Qrcode !== 'undefined') {
-            resolve();
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js';
-        script.onload = resolve;
-        script.onerror = () => reject(new Error('فشل تحميل مكتبة مسح الباركود'));
-        document.head.appendChild(script);
-    });
-}
-
-// إيقاف مسح الباركود
-async function stopBarcodeScanner() {
-    try {
-        if (html5QrcodeScanner && isScanning) {
-            await html5QrcodeScanner.stop();
-            html5QrcodeScanner.clear();
-            isScanning = false;
-            document.getElementById('camera-status').textContent = 'تم إيقاف المسح';
-            document.getElementById('camera-status').style.background = '#fff3cd';
-            console.log('تم إيقاف الماسح');
-        }
-    } catch (error) {
-        console.error('خطأ في إيقاف الماسح:', error);
-    }
-}
-
-// عند نجاح المسح
-function onScanSuccess(decodedText, decodedResult) {
-    console.log('تم مسح الباركود:', decodedText);
-    
-    document.getElementById('barcode-value').textContent = decodedText;
-    document.getElementById('camera-meter-number').value = decodedText;
-    document.getElementById('barcode-result').style.display = 'block';
-    
-    showResult('✅ تم قراءة الباركود بنجاح', 'success');
-    
-    // إيقاف المسح تلقائياً بعد القراءة الناجحة
-    setTimeout(() => {
-        stopBarcodeScanner();
-        document.getElementById('camera-status').textContent = 'تم قراءة الباركود بنجاح!';
-        document.getElementById('camera-status').style.background = '#d1ecf1';
-    }, 2000);
-}
-
-// عند فشل المسح
-function onScanFailure(error) {
-    // لا تفعل شيء - هذه الدالة تُستدعى باستمرار أثناء المسح
-}
-
-// إرسال البيانات إلى Google Sheets مع تصحيح الأخطاء
-async function submitData(inputMethod) {
-    const meterNumber = document.getElementById(inputMethod + '-meter-number').value.trim();
-    const notes = document.getElementById(inputMethod + '-notes').value.trim();
-    
-    if (!meterNumber) {
-        showResult('يرجى إدخال رقم العداد', 'error');
+// الحصول على الموقع الحالي بدقة عالية
+function getCurrentLocation() {
+    if (!navigator.geolocation) {
+        showResult('المتصفح لا يدعم خدمة الموقع', 'error');
         return;
     }
+
+    document.getElementById('location-status').innerHTML = `
+        <strong>جاري الحصول على الموقع...</strong><br>
+        <em>يتم الآن تحسين دقة الموقع، قد يستغرق بضع ثواني</em>
+    `;
+    document.getElementById('location-status').style.background = '#fff3cd';
+
+    // إيقاف أي عملية سابقة
+    if (locationWatchId) {
+        navigator.geolocation.clearWatch(locationWatchId);
+    }
+
+    let bestAccuracy = Infinity;
+    let bestPosition = null;
+    let attempts = 0;
+    const maxAttempts = 10; // أقصى عدد من المحاولات
+
+    locationWatchId = navigator.geolocation.watchPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            const altitude = position.coords.altitude;
+            const altitudeAccuracy = position.coords.altitudeAccuracy;
+            
+            attempts++;
+            
+            console.log(`محاولة ${attempts}: الدقة = ${accuracy} متر`);
+
+            // تحديث أفضل نتيجة
+            if (accuracy < bestAccuracy) {
+                bestAccuracy = accuracy;
+                bestPosition = position;
+                
+                // تحديث الحقول مباشرة
+                document.getElementById('latitude').value = lat.toFixed(8);
+                document.getElementById('longitude').value = lng.toFixed(8);
+                
+                // تحديث حالة الموقع
+                updateLocationStatus(position, attempts);
+            }
+
+            // التوقف إذا وصلنا لدقة ممتازة أو تجاوزنا عدد المحاولات
+            if (accuracy <= 10 || attempts >= maxAttempts) {
+                navigator.geolocation.clearWatch(locationWatchId);
+                locationWatchId = null;
+                
+                if (bestPosition) {
+                    finalizeLocation(bestPosition);
+                }
+            }
+        },
+        function(error) {
+            navigator.geolocation.clearWatch(locationWatchId);
+            locationWatchId = null;
+            
+            let errorMessage = 'فشل في الحصول على الموقع: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += 'تم رفض الإذن. يرجى السماح بالوصول إلى الموقع';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'معلومات الموقع غير متاحة';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += 'انتهت مهلة طلب الموقع';
+                    break;
+                default:
+                    errorMessage += 'خطأ غير معروف';
+            }
+            
+            document.getElementById('location-status').innerHTML = `<strong>${errorMessage}</strong>`;
+            document.getElementById('location-status').style.background = '#f8d7da';
+            showResult(errorMessage, 'error');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 30000,
+            maximumAge: 0
+        }
+    );
+
+    // إيقاف تلقائي بعد 30 ثانية كحد أقصى
+    setTimeout(() => {
+        if (locationWatchId) {
+            navigator.geolocation.clearWatch(locationWatchId);
+            locationWatchId = null;
+            if (bestPosition) {
+                finalizeLocation(bestPosition);
+            } else {
+                document.getElementById('location-status').innerHTML = `
+                    <strong>انتهت مهلة الحصول على الموقع</strong><br>
+                    <em>جرب مرة أخرى في مكان مفتوح</em>
+                `;
+                document.getElementById('location-status').style.background = '#f8d7da';
+            }
+        }
+    }, 30000);
+}
+
+// تحديث حالة الموقع أثناء المحاولات
+function updateLocationStatus(position, attempts) {
+    const accuracy = position.coords.accuracy;
+    let accuracyClass = 'accuracy-low';
+    let accuracyText = 'منخفضة';
     
+    if (accuracy <= 10) {
+        accuracyClass = 'accuracy-high';
+        accuracyText = 'عالية جداً';
+    } else if (accuracy <= 25) {
+        accuracyClass = 'accuracy-medium';
+        accuracyText = 'جيدة';
+    }
+    
+    document.getElementById('location-status').innerHTML = `
+        <strong>جاري تحسين الدقة... (${attempts})</strong><br>
+        <strong>الدقة الحالية:</strong> <span class="accuracy-indicator ${accuracyClass}">${accuracy.toFixed(1)} متر (${accuracyText})</span><br>
+        <em>استمر في الانتظار للحصول على أفضل دقة</em>
+    `;
+    document.getElementById('location-status').style.background = '#fff3cd';
+}
+
+// إنهاء عملية الحصول على الموقع
+function finalizeLocation(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+    
+    currentLocation = { lat, lng, accuracy };
+    
+    let accuracyClass = 'accuracy-low';
+    let accuracyText = 'منخفضة';
+    
+    if (accuracy <= 10) {
+        accuracyClass = 'accuracy-high';
+        accuracyText = 'عالية جداً';
+    } else if (accuracy <= 25) {
+        accuracyClass = 'accuracy-medium';
+        accuracyText = 'جيدة';
+    }
+    
+    document.getElementById('location-status').innerHTML = `
+        <strong>تم الحصول على الموقع بنجاح!</strong><br>
+        <strong>خط العرض:</strong> ${lat.toFixed(8)}<br>
+        <strong>خط الطول:</strong> ${lng.toFixed(8)}<br>
+        <strong>الدقة:</strong> <span class="accuracy-indicator ${accuracyClass}">${accuracy.toFixed(1)} متر (${accuracyText})</span>
+    `;
+    document.getElementById('location-status').style.background = '#d4edda';
+    
+    if (accuracy <= 10) {
+        showResult('📍 تم الحصول على الموقع بدقة عالية جداً (أقل من 10 أمتار)', 'success');
+    } else if (accuracy <= 25) {
+        showResult('📍 تم الحصول على الموقع بدقة جيدة', 'success');
+    } else {
+        showResult('⚠️ تم الحصول على الموقع ولكن الدقة منخفضة. جرب في مكان مفتوح', 'error');
+    }
+}
+
+// مسح الإحداثيات
+function clearLocation() {
+    if (locationWatchId) {
+        navigator.geolocation.clearWatch(locationWatchId);
+        locationWatchId = null;
+    }
+    
+    currentLocation = null;
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+    document.getElementById('location-status').textContent = 'لم يتم الحصول على الموقع بعد';
+    document.getElementById('location-status').style.background = '#e9ecef';
+    showResult('تم مسح الإحداثيات', 'success');
+}
+
+// التحقق من صحة البيانات
+function validateForm() {
+    const requiredFields = [
+        'meterNumber', 'meterType', 'meterBrand', 'valveType', 'valveCondition',
+        'boxCondition', 'pieceNumber', 'propertyType', 'propertyCondition',
+        'hasEncroachment', 'districtName', 'electricMetersCount', 
+        'latitude', 'longitude', 'technicianName'
+    ];
+    
+    let missingFields = [];
+    requiredFields.forEach(field => {
+        const value = document.getElementById(field).value.trim();
+        if (!value) {
+            missingFields.push(field);
+        }
+    });
+    
+    if (missingFields.length > 0) {
+        showResult(`❌ يرجى ملء جميع الحقول المطلوبة`, 'error');
+        return false;
+    }
+    
+    // التحقق من الموقع
+    if (!currentLocation) {
+        showResult('❌ يرجى الحصول على الموقع أولاً', 'error');
+        return false;
+    }
+    
+    // التحقق من دقة الموقع
+    if (currentLocation.accuracy > 50) {
+        showResult('⚠️ دقة الموقع منخفضة. يرجى الحصول على موقع بدقة أعلى', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+// إرسال جميع البيانات
+async function submitAllData() {
     try {
+        if (!validateForm()) {
+            return;
+        }
+        
         showResult('جاري حفظ البيانات...', 'success');
         
-        // رابط Google Apps Script - استبدله برابطك
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykfcMC6FpnJrhG0mQnPWb5Nyec2VhLuD_ERNJ9xEQuXUEW-56el_Li1OoDw13976mQ/exec';
+        // تجميع البيانات
+        const formData = {
+            meterNumber: document.getElementById('meterNumber').value,
+            meterType: document.getElementById('meterType').value,
+            meterBrand: document.getElementById('meterBrand').value,
+            valveType: document.getElementById('valveType').value,
+            valveCondition: document.getElementById('valveCondition').value,
+            boxCondition: document.getElementById('boxCondition').value,
+            pieceNumber: document.getElementById('pieceNumber').value,
+            propertyType: document.getElementById('propertyType').value,
+            propertyCondition: document.getElementById('propertyCondition').value,
+            hasEncroachment: document.getElementById('hasEncroachment').value,
+            districtName: document.getElementById('districtName').value,
+            electricMetersCount: document.getElementById('electricMetersCount').value,
+            latitude: document.getElementById('latitude').value,
+            longitude: document.getElementById('longitude').value,
+            technicianName: document.getElementById('technicianName').value,
+            notes: document.getElementById('notes').value,
+            locationAccuracy: currentLocation.accuracy.toFixed(1)
+        };
         
-        console.log('إرسال البيانات:', { meterNumber, notes, inputMethod });
+        console.log('بيانات المرسلة:', formData);
+        
+        // رابط Google Apps Script - تأكد من استبداله برابطك
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaA2IEJQFz5J8L6XldSB7XHO_DW13uI2ppgkAo9jvk7fRUaJG-uLYT4x0hQtDi5xF2/exec';
         
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // مهم للـ Google Apps Script
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                meterNumber: meterNumber,
-                notes: notes,
-                inputMethod: inputMethod === 'camera' ? 'مسح الباركود' : 'إدخال يدوي'
-            })
+            body: JSON.stringify(formData)
         });
         
-        // مع no-cors لا يمكننا قراءة الاستجابة، لكن نعتبره نجاحاً
-        showResult('✅ تم إرسال البيانات بنجاح', 'success');
+        const result = await response.json();
         
-        // مسح الحقول
-        document.getElementById(inputMethod + '-meter-number').value = '';
-        document.getElementById(inputMethod + '-notes').value = '';
-        document.getElementById('barcode-result').style.display = 'none';
+        if (result.status === 'success') {
+            showResult(`✅ تم حفظ جميع البيانات بنجاح في Google Sheets. الرقم التسلسلي: ${result.data.serialNumber}`, 'success');
+            clearAllData();
+        } else {
+            showResult('❌ خطأ في حفظ البيانات: ' + (result.message || 'غير معروف'), 'error');
+        }
         
     } catch (error) {
         console.error('خطأ في الاتصال:', error);
         showResult('❌ خطأ في إرسال البيانات: ' + error.message, 'error');
+    }
+}
+
+// مسح جميع البيانات
+function clearAllData() {
+    if (confirm('هل أنت متأكد من مسح جميع البيانات؟')) {
+        // مسح الحقول
+        document.getElementById('main-form').reset();
+        
+        // مسح الموقع
+        clearLocation();
+        
+        showResult('تم مسح جميع البيانات', 'success');
     }
 }
 
@@ -189,16 +299,20 @@ function showResult(message, type) {
     }, 5000);
 }
 
-// فتح console لأغراض التصحيح
-function openDebugConsole() {
-    console.log('=== بدء التصحيح ===');
-    console.log('المتصفح:', navigator.userAgent);
-    console.log('يدعم الكاميرا:', !!navigator.mediaDevices);
-    console.log('الرابط:', window.location.href);
-}
-
 // تهيئة الصفحة عند التحميل
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('تم تحميل التطبيق بنجاح');
-    openDebugConsole();
+    console.log('تم تحميل تطبيق إدارة العدادات بنجاح');
+    
+    // إضافة تنبيه لأهمية الموقع
+    setTimeout(() => {
+        showResult('📍 يرجى الحصول على الموقع أولاً لأهميته في تسجيل البيانات', 'success');
+    }, 2000);
+    
+    // إضافة تحقق عند مغادرة الصفحة
+    window.addEventListener('beforeunload', function(e) {
+        if (document.getElementById('meterNumber').value) {
+            e.preventDefault();
+            e.returnValue = 'هل تريد مغادرة الصفحة؟ قد تفقد البيانات غير المحفوظة.';
+        }
+    });
 });
