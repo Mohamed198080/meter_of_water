@@ -148,7 +148,7 @@ async function submitData(inputMethod) {
         showResult('جاري حفظ البيانات...', 'success');
         
         // رابط Google Apps Script - استبدله برابطك
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwOYAO_FJ0adR4mBw7ie0XzgPgL-8kknumw2FbwsNBqLlcpSFBKIfckRMexvsZhdMck/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMFQzPTzwlWOiSbC0uZRKMD9eF2Le1CxKcLk8mhhcPPZZd1UJRDKC4MAlRWdDvV_gw/exec';
         
         console.log('إرسال البيانات:', { meterNumber, notes, inputMethod });
         
